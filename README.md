@@ -2,6 +2,8 @@
 Простой локальный поисковик для файлов. Поиск происходит по названиям папок и файлов, учитывая разные факторы для ранжирования тех или иных файлов.
 ## Настройка
 Для создания базы данных кликните правой кнопкой мыши, по иконке, в области уведомлений (tray) и перейдите в пункт "Базы данных " -> "Создать". Выберите нужные папки, исключите ненужные, выберите нужные форматы и сохраните базу данных (без пробелов), в папку с программой.
+<br><br>
+По умолчанию доступ к поиску открыт только для адреса 127.0.0.1. Изменить список адресов можно в файле "Allow.txt". Для того, чтобы открыть доступ всем адресам необходимо добавить в файл строку "ALL".
 ## Фильтры
 Для лучшего поиска можно применять фильтры.
 <br>
@@ -22,6 +24,8 @@
 Simple local search engine for files. Search is based on the names of the folders and files, taking into account the various factors for ranking certain files.
 ## Setup
 To create a database, right-click, on the icon, in the notification area (tray) and go to the "Databases" -> "New". Select the desired folders, exclude unnecessary, select the desired formats and save the database (no spaces), to the folder with the program.
+<br><br>
+By default, the access to the search is open only for the address 127.0.0.1. You can change the address list in the "Allow.txt" file. In order to open access to all addresses, you must add "ALL" to the file.
 ## Filters
 For a better search, you can apply filters.
 <br>
@@ -35,3 +39,5 @@ By default, the search is done in the standard category ("default.xml").<br>
 **[Download](https://github.com/r57zone/Home-Search/releases)**<br>
 ## Feedback
 `r57zone[at]gmail.com`
+
+<span style="color:white;">Google Desktop, Yandex Desktop, Архивариус 3000.</span>
