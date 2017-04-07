@@ -18,7 +18,7 @@
 ## Обратная связь
 `r57zone[собака]gmail.com`
 
-# Home Search (Ru)
+# Home Search (En)
 Simple local search engine for files. Search is based on the names of the folders and files, taking into account the various factors for ranking certain files.
 ## Setup
 To create a database, right-click, on the icon, in the notification area (tray) and go to the "Databases" -> "New". Select the desired folders, exclude unnecessary, select the desired formats and save the database (no spaces), to the folder with the program.
