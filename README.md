@@ -40,4 +40,4 @@ By default, the search is done in the standard category ("default.xml").<br>
 ## Feedback
 `r57zone[at]gmail.com`
 
-<span style="color:white;">Google Desktop, Yandex Desktop, Архивариус 3000.</span>
+Tags: Google Desktop, Yandex Desktop, Архивариус 3000.
