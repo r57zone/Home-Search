@@ -1,5 +1,5 @@
 # Home Search (Ru)
-Простой локальный поисковик для файлов. Поиск происходит по названиям папок и файлов, учитывая разные факторы для ранжирования тех или иных файлов.
+Простой локальный поисковик файлов. Поиск происходит по названиям папок и файлов, учитывая разные факторы для ранжирования тех или иных файлов.
 ## Настройка
 Для создания базы данных кликните правой кнопкой мыши, по иконке, в области уведомлений (tray) и перейдите в пункт "Базы данных " -> "Создать". Выберите нужные папки, исключите ненужные, выберите нужные форматы и сохраните базу данных (без пробелов), сохранить в папку с программой.
 <br><br>
@@ -21,7 +21,7 @@
 `r57zone[собака]gmail.com`
 
 # Home Search (En)
-Simple local search engine for files. Search is based on the names of the folders and files, taking into account the various factors for ranking certain files.
+Simple local search engine files. Search is based on the names of the folders and files, taking into account the various factors for ranking certain files.
 ## Setup
 To create a database, right-click, on the icon, in notification area (tray) and go to "Databases" -> "New". Select the desired folders, exclude unnecessary, select the desired formats and save the database (no spaces), save to folder with the program.
 <br><br>
