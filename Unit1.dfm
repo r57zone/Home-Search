@@ -50,7 +50,7 @@ object Main: TMain
     0000C00300008001000080010000000000000000000000000000000000000000
     000000000000000000000000000080010000C0030000E0070000F00F0000}
   OldCreateOrder = False
-  Position = poDesktopCenter
+  Position = poScreenCenter
   OnActivate = FormActivate
   OnCreate = FormCreate
   OnDestroy = FormDestroy

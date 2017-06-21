@@ -261,26 +261,26 @@ end;
 
 function RevertFixName(str: string): string;
 begin
-  str:=StringReplace(str, '&amp;','&',[rfreplaceall]);
-  str:=StringReplace(str, '&lt;','<',[rfreplaceall]);
-  str:=StringReplace(str, '&gt;','>',[rfreplaceall]);
-  str:=StringReplace(str, '&quot;','«»',[rfreplaceall]);
+  str:=StringReplace(str, '&amp;', '&', [rfreplaceall]);
+  str:=StringReplace(str, '&lt;', '<', [rfreplaceall]);
+  str:=StringReplace(str, '&gt;', '>', [rfreplaceall]);
+  str:=StringReplace(str, '&quot;', '«»', [rfreplaceall]);
   Result:=str;
 end;
 
 function FixName(str: string): string;
 begin
-  str:=StringReplace(str, '&','&amp;',[rfreplaceall]);
-  str:=StringReplace(str, '<','&lt;',[rfreplaceall]);
-  str:=StringReplace(str, '>','&gt;',[rfreplaceall]);
-  str:=StringReplace(str, '«»','&quot;',[rfreplaceall]);
+  str:=StringReplace(str, '&', '&amp;', [rfreplaceall]);
+  str:=StringReplace(str, '<', '&lt;', [rfreplaceall]);
+  str:=StringReplace(str, '>', '&gt;', [rfreplaceall]);
+  str:=StringReplace(str, '«»', '&quot;', [rfreplaceall]);
   Result:=str;
 end;
 
 function FixNameURI(str: string): string;
 begin
-  str:=StringReplace(str, '\','\\',[rfreplaceall]);
-  str:=StringReplace(str, '&','#!',[rfreplaceall]);
+  str:=StringReplace(str, '\', '\\', [rfreplaceall]);
+  str:=StringReplace(str, '&', '#!', [rfreplaceall]);
   Result:=str;
 end;
 
@@ -347,7 +347,7 @@ begin
   if RequestType='pics' then Filters:='jpg jpeg bmp png apng gif';
   if RequestType='video' then Filters:='mp4 3gp flv mpeg avi mkv mov';
   if RequestType='music' then Filters:='mp3 wav aac flac ogg';
-  if RequestType='arch' then Filters:='7z zip rar tar.gz';
+  if RequestType='arch' then Filters:='7z zip rar';
 
   ResultsC:=0;
 
@@ -371,9 +371,9 @@ begin
       ResultRank:=ResultRank+9;
 
     //Проверка на частичное вхождение
-    if Pos(AnsiLowerCase(RequestText), AnsiLowerCase(CheckList.Text))>0 then
+    if Pos(AnsiLowerCase(RequestText), AnsiLowerCase(CheckList.Text)) > 0 then
       ResultRank:=ResultRank + 3;
-    if Pos(AnsiLowerCase(CheckList.Text), AnsiLowerCase(RequestText))>0 then
+    if Pos(AnsiLowerCase(CheckList.Text), AnsiLowerCase(RequestText)) > 0 then
       ResultRank:=ResultRank + 3;
 
     //Проверка на совпадение c ошибками
@@ -408,9 +408,9 @@ begin
     CheckList.Text:=Copy(Copy(ResponseNode.ChildNodes[i].Attributes['path'], Length(ExtractFileDrive(ResponseNode.ChildNodes[i].Attributes['path']))+1, Length(ResponseNode.ChildNodes[i].Attributes['path'])), 2, Length(ResponseNode.ChildNodes[i].Attributes['path'])-Length(ResponseNode.ChildNodes[i].NodeValue+'.'+ResponseNode.ChildNodes[i].Attributes['ext'])-3);
 
     //Проверка прямое вхождение запроса на папку
-    if Pos(AnsiLowerCase(RequestText), AnsiLowerCase(CheckList.Text))>0 then
+    if Pos(AnsiLowerCase(RequestText), AnsiLowerCase(CheckList.Text)) > 0 then
       ResultRank:=ResultRank + 3;
-    if Pos(AnsiLowerCase(CheckList.Text), AnsiLowerCase(RequestText))>0 then
+    if Pos(AnsiLowerCase(CheckList.Text), AnsiLowerCase(RequestText)) > 0 then
       ResultRank:=ResultRank + 3;
 
     //Разделение папок на строки
@@ -619,7 +619,7 @@ begin
       end else AResponseInfo.ContentText:=StringReplace(Template404.Text, '[%FILE%]', AnsiToUTF8(TempFilePath), [rfIgnoreCase]);
     end;
 
-    //Открытие попапок по запросу
+    //Открытие папок по запросу
     if Copy(ARequestInfo.Params.Text, 1, 11)='OpenFolder=' then begin
       TempFilePath:=RevertFixNameURI(Copy(ARequestInfo.Params.Strings[0], 12, Length(ARequestInfo.Params.Strings[0])));
       if FileExists(TempFilePath) then begin
