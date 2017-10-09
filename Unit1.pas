@@ -629,8 +629,6 @@ begin
 
   CoInitialize(nil);
 
-  Main.Paths.Lines.Add(ExtractFilePath(ParamStr(0)) + TempRequestDocument);
-
   if (ARequestInfo.Document = '') or (ARequestInfo.Document = '/') and (ARequestInfo.Params.Text = '') then
     AResponseInfo.ContentText:=TemplateMain.Text
   else begin
