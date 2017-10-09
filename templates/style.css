@@ -59,11 +59,15 @@ body{font-family: arial,sans-serif; font-size:14px;}
 #item #title{font-size: 16px;}
 #item #title, #item #open-folder{cursor:pointer;}
 #item #title:hover, #item #open-folder:hover{text-decoration:underline;}
+#pages {width:860px;}
+#pages span{cursor:pointer; padding: 3px 2px; display:inline-block; color: #4e8bec;}
+#pages .active{color:black;}
 
 #footer{
 	margin-bottom:0;
 	color:#666666;
 	padding:20px;
+	height:14px;
 	background-color:#f7f7f7;
 	border-top:1px solid #e5e5e5;
 	text-align:center;

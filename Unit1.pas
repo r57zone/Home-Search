@@ -23,7 +23,7 @@ type
     ClearFormatsBtn: TButton;
     IgnorePaths: TMemo;
     AddIgnorePathBtn: TButton;
-    XPManifest1: TXPManifest;
+    XPManifest: TXPManifest;
     IdHTTPServer: TIdHTTPServer;
     SaveDialog: TSaveDialog;
     PopupMenu: TPopupMenu;
@@ -43,6 +43,8 @@ type
     OpenDialog: TOpenDialog;
     OpenIgnorePathsBtn: TButton;
     SaveIgnorePathsBtn: TButton;
+    VideoCB: TCheckBox;
+    AudioCB: TCheckBox;
     procedure FormCreate(Sender: TObject);
     procedure CreateCategoryBtnClick(Sender: TObject);
     procedure IdHTTPServerCommandGet(AThread: TIdPeerThread;
@@ -114,13 +116,13 @@ begin
     uFlags:=nif_icon or nif_message or nif_tip;
     //hIcon:=Application.Icon.Handle;
     hIcon:=Main.Icon.Handle;
-    uCallBackMessage:=WM_User+1;
+    uCallBackMessage:=WM_User + 1;
     StrCopy(szTip, PChar(Application.Title));
   end;
   case n of
-    1: Shell_NotifyIcon(nim_add,@nim);
-    2: Shell_NotifyIcon(nim_delete,@nim);
-    3: Shell_NotifyIcon(nim_modify,@nim);
+    1: Shell_NotifyIcon(nim_add, @nim);
+    2: Shell_NotifyIcon(nim_delete, @nim);
+    3: Shell_NotifyIcon(nim_modify, @nim);
   end;
 end;
 
@@ -140,8 +142,8 @@ var i, j, m, n: integer;
 begin 
   s := copy(s, 1, cuthalf - 1);
   t := copy(t, 1, cuthalf - 1); 
-  m := length(s);
-  n := length(t);
+  m := Length(s);
+  n := Length(t);
   if m = 0 then Result := n
   else if n = 0 then Result := m
   else begin
@@ -191,7 +193,6 @@ begin
   Tray(1);
   Main.AlphaBlend:=true;
   Main.AlphaBlendValue:=0;
-  //SetWindowLong(Application.Handle, GWL_EXSTYLE,GetWindowLong(Application.Handle, GWL_EXSTYLE) or WS_EX_TOOLWINDOW);  //Скрываем программу с панели задач
 end;
 
 //Возможное количество ошибок для слова
@@ -261,26 +262,27 @@ end;
 
 function RevertFixName(str: string): string;
 begin
-  str:=StringReplace(str, '&amp;', '&', [rfreplaceall]);
-  str:=StringReplace(str, '&lt;', '<', [rfreplaceall]);
-  str:=StringReplace(str, '&gt;', '>', [rfreplaceall]);
-  str:=StringReplace(str, '&quot;', '«»', [rfreplaceall]);
+  str:=StringReplace(str, '&amp;', '&', [rfReplaceAll]);
+  str:=StringReplace(str, '&lt;', '<', [rfReplaceAll]);
+  str:=StringReplace(str, '&gt;', '>', [rfReplaceAll]);
+  str:=StringReplace(str, '&quot;', '«»', [rfReplaceAll]);
   Result:=str;
 end;
 
 function FixName(str: string): string;
 begin
-  str:=StringReplace(str, '&', '&amp;', [rfreplaceall]);
-  str:=StringReplace(str, '<', '&lt;', [rfreplaceall]);
-  str:=StringReplace(str, '>', '&gt;', [rfreplaceall]);
-  str:=StringReplace(str, '«»', '&quot;', [rfreplaceall]);
+  str:=StringReplace(str, '&', '&amp;', [rfReplaceAll]);
+  str:=StringReplace(str, '<', '&lt;', [rfReplaceAll]);
+  str:=StringReplace(str, '>', '&gt;', [rfReplaceAll]);
+  str:=StringReplace(str, '«»', '&quot;', [rfReplaceAll]);
   Result:=str;
 end;
 
 function FixNameURI(str: string): string;
 begin
-  str:=StringReplace(str, '\', '\\', [rfreplaceall]);
-  str:=StringReplace(str, '&', '#!', [rfreplaceall]);
+  str:=StringReplace(str, '\', '\\', [rfReplaceAll]);
+  str:=StringReplace(str, '&', '*AMP', [rfReplaceAll]);
+  str:=StringReplace(str, '''', '*APOS', [rfReplaceAll]);
   Result:=str;
 end;
 
@@ -293,18 +295,19 @@ end;
 function RevertFixNameURI(str: string): string;
 begin
   str:=URLDecode(str);
-  str:=StringReplace(str, '\\','\',[rfreplaceall]);
-  str:=StringReplace(str, '#!','&',[rfreplaceall]);
+  str:=StringReplace(str, '*APOS', '''', [rfReplaceAll]);
+  str:=StringReplace(str, '\\', '\',[rfReplaceAll]);
+  str:=StringReplace(str, '*AMP', '&',[rfReplaceAll]);
   if UTF8Decode(str) <> '' then str:=UTF8ToAnsi(str);
   Result:=str;
 end;
 
 function TMain.GetResults(RequestText, RequestType, RequestExt, RequestCategory: string): string;
 var
-  ResponseNode: IXMLNode; i, j, n, ResultRank, TickTime: integer; Doc: IXMLDocument;
+  ResponseNode: IXMLNode; i, j, n, ResultRank, TickTime, PagesCount: integer; Doc: IXMLDocument;
   Filters: string;
   CheckList, SearchList, Results: TStringList;
-  ResultsA: array of record
+  ResultsA: array of Packed Record
     Name: string;
     Path: string;
     Rank: integer;
@@ -314,6 +317,7 @@ var
   TempName, TempPath: string;
 const
   MinCountWord = 2;
+  ResultsPageCount = 12;  //Кол-во результатов на страницу
 begin
   CheckList:=TStringList.Create;
   SearchList:=TStringList.Create;
@@ -346,7 +350,7 @@ begin
   if RequestType='text' then Filters:='txt html htm doc rtf';
   if RequestType='pics' then Filters:='jpg jpeg bmp png apng gif';
   if RequestType='video' then Filters:='mp4 3gp flv mpeg avi mkv mov';
-  if RequestType='music' then Filters:='mp3 wav aac flac ogg';
+  if RequestType='audio' then Filters:='mp3 wav aac flac ogg';
   if RequestType='arch' then Filters:='7z zip rar';
 
   ResultsC:=0;
@@ -368,7 +372,7 @@ begin
 
     //Проверка на полное совпадение
     if AnsiLowerCase(RequestText) = AnsiLowerCase(ResponseNode.ChildNodes[i].NodeValue) then
-      ResultRank:=ResultRank+9;
+      ResultRank:=ResultRank + 9;
 
     //Проверка на частичное вхождение
     if Pos(AnsiLowerCase(RequestText), AnsiLowerCase(CheckList.Text)) > 0 then
@@ -378,12 +382,17 @@ begin
 
     //Проверка на совпадение c ошибками
     if LeveDist(AnsiLowerCase(requestText), AnsiLowerCase(ResponseNode.ChildNodes[i].NodeValue)) < GetErrorCount(RequestText) then
-      ResultRank:=ResultRank+7;
+      ResultRank:=ResultRank + 7;
 
     for j:=0 to CheckList.Count - 1 do
       for n:=0 to SearchList.Count - 1 do
         if (Length(SearchList.Strings[n]) > MinCountWord) and (Length(CheckList.Strings[j]) > MinCountWord) then begin
+
           //Проверка на прямое вхождение
+          if AnsiLowerCase(SearchList.Strings[n])=AnsiLowerCase(CheckList.Strings[j]) then
+            resultRank:=resultRank + 7;
+
+          //Проверка на частичное вхождение
           if Pos(AnsiLowerCase(SearchList.Strings[n]), AnsiLowerCase(CheckList.Strings[j])) > 0 then
             resultRank:=resultRank + 5;
 
@@ -424,7 +433,7 @@ begin
 
             //Проверка на название папок без ошибок
             if AnsiLowerCase(searchList.Strings[n])=AnsiLowerCase(checkList.Strings[j]) then
-              ResultRank:=ResultRank + 2;
+              ResultRank:=ResultRank + 2 else
 
             //Проверка на название папок с ошибками (расстояние Левинштейна)
             if (LeveDist(AnsiLowerCase(SearchList.Strings[n]), AnsiLowerCase(CheckList.Strings[j])) < GetErrorCount(SearchList.Strings[n])) then
@@ -462,20 +471,36 @@ begin
       end;
 
     if ResultsC > 0 then
-      Results.Add('<span style="display:block; color:gray; padding-bottom:12px;">Результатов: '+IntToStr(ResultsC)+' ('+FloatToStr((GetTickCount - TickTime)/1000)+' сек.)</span>')
+      Results.Add(#9 + '<span style="display:block; color:gray; padding-bottom:12px;">Результатов: '+IntToStr(ResultsC)+' ('+FloatToStr((GetTickCount - TickTime)/1000)+' сек.)</span>' + #13#10)
     else
-      Results.Add('<p>По Вашему запросу <b>'+RequestText+'</b> не найдено соответствующих файлов.</p>');
+      Results.Add(#9 + '<p>По Вашему запросу <b>'+RequestText+'</b> не найдено соответствующих файлов.</p>' + #13#10);
 
 
     //Вывод результатов
-    for i:=0 to Length(ResultsA)-1 do
-      Results.Add('<div id="item">' + #13#10 +
-      '<span id="title" onclick="Request(''' + '/?OpenFile=' + FixNameURI(ResultsA[i].path) + ''', this);">' + ResultsA[i].name + ExtractFileExt(ResultsA[i].Path) + '</span>' + #13#10 +
-      '<!--RageRank ' + IntToStr(ResultsA[i].rank) + '-->' + #13#10 +
-      '<div id="link" style="color:green;">' + ResultsA[i].path + '</div>' + #13#10 +
+    PagesCount:=1;
+    Results.Add(#9 + '<div id="page1" style="display:none;">' + #13#10);
+    for i:=0 to Length(ResultsA) - 1 do begin
+      if (i + 1) mod ResultsPageCount = 0 then begin
+        Inc(PagesCount);
+        Results.Add('</div>' + #13#10#13#10 + '<div id="page' + IntToStr(PagesCount) + '" style="display:none;">');
+      end;
+      Results.Add(#9#9 + '<div id="item">' + #13#10 +
+      #9#9#9 + '<span id="title" onclick="Request(''' + '/?OpenFile=' + FixNameURI(ResultsA[i].path) + ''', this);">' + ResultsA[i].name + ExtractFileExt(ResultsA[i].Path) + '</span>' + #13#10 +
+      #9#9#9 + '<!--RageRank ' + IntToStr(ResultsA[i].rank) + '-->' + #13#10 +
+      #9#9#9 + '<div id="link" style="color:green;">' + ResultsA[i].path + '</div>' + #13#10 +
       //'<div id="description">Пусто</div>' + #13#10 +
-      '<span id="open-folder" onclick="Request(''' + '/?OpenFolder=' + FixNameURI(ResultsA[i].path) + ''', this);">Открыть папку</span>' + #13#10 +
-      '</div>' + #13#10);
+      #9#9#9 + '<span id="open-folder" onclick="Request(''' + '/?OpenFolder=' + FixNameURI(ResultsA[i].path) + ''', this);">Открыть папку</span>' + #13#10 +
+      #9#9 + '</div>' + #13#10);
+    end;
+      Results.Add(#9 + '</div>' + #13#10);
+
+  //Вывод страничной навигации
+  if PagesCount > 1 then begin
+    Results.Add(#13#10 + '<div id="pages">Страницы: ');
+    for i:=1 to PagesCount do
+       Results.Text:=Results.Text + '<span id="nav' + IntToStr(i) + '" onclick="ShowResults(' + IntToStr(i) + ');">' + IntToStr(i) + '</span>';
+    Results.Add(#13#10 + '</div>');
+  end;
 
   Result:=Results.Text;
   Results.Free;
@@ -493,17 +518,18 @@ begin
 
   //Игнорируемые папки
   if (Trim(Main.IgnorePaths.Text) <> '') then
-    for i:=0 to Main.IgnorePaths.Lines.Count-1 do
-      if Trim(Main.IgnorePaths.Lines.Strings[i]) <> '' then if Main.IgnorePaths.Lines.Strings[i] + '\' = Dir then Exit;
+    for i:=0 to Main.IgnorePaths.Lines.Count - 1 do
+      if Trim(Main.IgnorePaths.Lines.Strings[i]) <> '' then
+        if Main.IgnorePaths.Lines.Strings[i] + '\' = Dir then Exit;
 
   //Поиск файлов
   if FindFirst(Dir + '*.*', faAnyFile, SR) = 0 then begin
     repeat
       Application.ProcessMessages;
-      if (SR.name <> '.') and (sr.name <> '..') then
+      if (SR.name <> '.') and (SR.name <> '..') then
         if (SR.Attr and faDirectory) <> faDirectory then begin
-          if (Pos(AnsiLowerCase(Copy(ExtractFileExt(Dir + SR.name), 2, Length(ExtractFileExt(Dir + SR.name)))), AnsiLowerCase(Main.ExtEdit.Text))>0) or (Main.ExtEdit.Text='') then
-            XMLFile.Add('   <file ext="' + AnsiLowerCase(Copy(ExtractFileExt(SR.Name), 2, Length(ExtractFileExt(SR.Name)))) + '" path="'+ FixName(Dir + SR.name) + '">'+ FixName(Copy(SR.Name, 1, Length(SR.Name)-Length(ExtractFileExt(SR.Name)))) + '</file>');
+          if (Pos(AnsiLowerCase(Copy(ExtractFileExt(Dir + SR.name), 2, Length(ExtractFileExt(Dir + SR.name)))), AnsiLowerCase(Main.ExtEdit.Text)) > 0) or (Main.ExtEdit.Text = '') then
+            XMLFile.Add('   <file ext="' + AnsiLowerCase(Copy(ExtractFileExt(SR.Name), 2, Length(ExtractFileExt(SR.Name)))) + '" path="'+ FixName(Dir + SR.name) + '">'+ FixName(Copy(SR.Name, 1, Length(SR.Name) - Length(ExtractFileExt(SR.Name)))) + '</file>');
         end else ScanDir(Dir + SR.name + '\');
     until FindNext(SR)<>0;
     FindClose(SR);
@@ -541,9 +567,19 @@ begin
     CreateCategoryBtn.Enabled:=false;
     CancelBtn.Enabled:=false;
 
-    if TextCB.Checked then if Pos('txt htm html', ExtEdit.Text)=0 then ExtEdit.Text:=ExtEdit.Text+' txt htm html';
-    if PicsCB.Checked then if Pos('jpg jpeg bmp png gif', ExtEdit.Text)=0 then ExtEdit.Text:=ExtEdit.Text+' jpg jpeg bmp png gif';
-    if ArchCB.Checked then if Pos('7z zip rar tar.gz', ExtEdit.Text)=0 then ExtEdit.Text:=ExtEdit.Text+' 7z zip rar tar.gz';
+    if TextCB.Checked then
+      if Pos('txt htm html', ExtEdit.Text) = 0 then ExtEdit.Text:=ExtEdit.Text+' txt html htm doc rtf';
+    if PicsCB.Checked then
+      if Pos('jpg jpeg bmp png apng gif', ExtEdit.Text) = 0 then ExtEdit.Text:=ExtEdit.Text+' jpg jpeg bmp png apng gif';
+    if VideoCB.Checked then
+      if Pos('mp4 3gp flv mpeg avi mkv mov', ExtEdit.Text) = 0 then ExtEdit.Text:=ExtEdit.Text+' mp4 3gp flv mpeg avi mkv mov';
+    if AudioCB.Checked then
+      if Pos('mp3 wav aac flac ogg', ExtEdit.Text) = 0 then ExtEdit.Text:=ExtEdit.Text+' mp3 wav aac flac ogg';
+    if ArchCB.Checked then
+      if Pos('7z zip rar', ExtEdit.Text) = 0 then ExtEdit.Text:=ExtEdit.Text+' 7z zip rar';
+    if ExtEdit.Text[1] = ' ' then ExtEdit.Text:=Copy(ExtEdit.Text, 2, Length(ExtEdit.Text));
+
+
     if AllCB.Checked then ExtEdit.Text:='';
 
     XMLFile:=TStringList.Create;
@@ -639,21 +675,21 @@ begin
 
       //Поиск команды type (тип данных)
       if Pos(' type:', AnsiLowerCase(RequestText)) > 0 then
-        for i:=Pos(' type:', AnsiLowerCase(RequestText))+6 to Length(RequestText) do begin
+        for i:=Pos(' type:', AnsiLowerCase(RequestText)) + 6 to Length(RequestText) do begin
           if RequestText[i]=' ' then break;
           RequestType:=RequestType+AnsiLowerCase(RequestText[i]);
         end;
 
       //Поиск команды ext (расширение)
       if Pos(AnsiLowerCase(' ext:'), AnsiLowerCase(RequestText)) > 0 then
-        for i:=Pos(' ext:', AnsiLowerCase(RequestText))+5 to Length(RequestText) do begin
+        for i:=Pos(' ext:', AnsiLowerCase(RequestText)) + 5 to Length(RequestText) do begin
           if RequestText[i]=' ' then break;
           RequestExt:=RequestExt+AnsiLowerCase(RequestText[i]);
         end;
 
       //Поиск команды ext (расширение)
       if Pos(AnsiLowerCase(' cat:'), AnsiLowerCase(RequestText)) > 0 then
-        for i:=Pos(' cat:', AnsiLowerCase(RequestText))+5 to Length(RequestText) do begin
+        for i:=Pos(' cat:', AnsiLowerCase(RequestText)) + 5 to Length(RequestText) do begin
           if RequestText[i]=' ' then break;
           RequestCategory:=RequestCategory+AnsiLowerCase(RequestText[i]);
         end;
@@ -693,7 +729,7 @@ begin
   BrowseInfo.lpSzTitle:=PChar(TitleName);
   BrowseInfo.ulFlags:=bIf_ReturnOnlyFSDirs;
   lpItemId:=shBrowseForFolder(BrowseInfo);
-  if lpItemId<>nil then begin
+  if lpItemId <> nil then begin
     shGetPathFromIdList(lpItemId, TempPath);
     Result:=TempPath;
     GlobalFreePtr(lpItemId);
@@ -703,7 +739,7 @@ end;
 procedure TMain.AddPathBtnClick(Sender: TObject);
 begin
   Paths.Lines.Add(BrowseFolderDialog('Выберите папку'));
-  if Paths.Lines.Strings[Paths.Lines.Count-1]='' then Paths.Lines.Delete(Paths.Lines.Count-1);
+  if Paths.Lines.Strings[Paths.Lines.Count-1] = '' then Paths.Lines.Delete(Paths.Lines.Count - 1);
 end;
 
 procedure TMain.ClearFormatsBtnClick(Sender: TObject);
@@ -714,8 +750,8 @@ end;
 procedure TMain.AddIgnorePathBtnClick(Sender: TObject);
 begin
   IgnorePaths.Lines.Add(BrowseFolderDialog('Выберите папку'));
-  if IgnorePaths.Lines.Strings[IgnorePaths.Lines.Count-1]='' then
-    IgnorePaths.Lines.Delete(IgnorePaths.Lines.Count-1);
+  if IgnorePaths.Lines.Strings[IgnorePaths.Lines.Count - 1] = '' then
+    IgnorePaths.Lines.Delete(IgnorePaths.Lines.Count - 1);
 end;
 
 procedure TMain.ExitBtnClick(Sender: TObject);
@@ -767,7 +803,7 @@ end;
 
 procedure TMain.FormActivate(Sender: TObject);
 begin
-  if RunOnce=false then begin
+  if RunOnce = false then begin
     RunOnce:=true;
     Main.AlphaBlend:=false;
     ShowWindow(Handle, SW_HIDE);  //Скрываем программу
@@ -777,7 +813,7 @@ end;
 
 procedure TMain.AboutBtnClick(Sender: TObject);
 begin
-    Application.MessageBox('Home Search 0.3.2'+#13#10+'Последнее обновление: 08.04.2017'+#13#10+'http://r57zone.github.io'+#13#10+'r57zone@gmail.com','О программе...',0);
+    Application.MessageBox('Home Search 0.4' + #13#10 + 'Последнее обновление: 09.10.2017' + #13#10 + 'http://r57zone.github.io' + #13#10 + 'r57zone@gmail.com', 'О программе...', 0);
 end;
 
 procedure TMain.PathsKeyDown(Sender: TObject; var Key: Word;

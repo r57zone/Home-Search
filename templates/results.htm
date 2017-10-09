@@ -7,30 +7,43 @@
 <link rel="stylesheet" href="/templates/style.css">
 <script type="text/javascript">
 	function RequestWithType(q, e){
-		var myValue=document.getElementById('search-input').value;
-		myValue=myValue.replace(' type:all', '');
-		myValue=myValue.replace(' type:text', '');
-		myValue=myValue.replace(' type:pics', '');
-		myValue=myValue.replace(' type:video', '');
-		myValue=myValue.replace(' type:music', '');
-		myValue=myValue.replace(' type:arch', '');
-		document.location.href='/?q=' + myValue + ' type:' + q;
-		e.style.color='#660099';
+		var myValue = document.getElementById('search-input').value;
+		myValue = myValue.replace(' type:all', '');
+		myValue = myValue.replace(' type:text', '');
+		myValue = myValue.replace(' type:pics', '');
+		myValue = myValue.replace(' type:video', '');
+		myValue = myValue.replace(' type:audio', '');
+		myValue = myValue.replace(' type:arch', '');
+		document.location.href = '/?q=' + myValue + ' type:' + q;
+		e.style.color = '#660099';
 	}
 	
 	function Request(q, e){
-		RequestWindow=window.open('http://' + window.location.host + decodeURIComponent(q), '_blank', '');
+		RequestWindow = window.open('http://' + window.location.host + decodeURIComponent(q), '_blank', '');
 		e.style.color='#660099';
 	}
 	
+	var CurPage = 1;
+	
+	function ShowResults(e) {
+		document.getElementById('page' + CurPage).style.display = 'none';
+		document.getElementById('nav' + CurPage).setAttribute('class', '');
+		document.getElementById('page' + e).style.display = 'block';
+		document.getElementById('nav' + e).setAttribute('class', 'active');
+		CurPage = e;
+		window.scrollTo(0, 0);
+	}
+	
 	document.addEventListener("DOMContentLoaded", function(event) {
-		var q=document.getElementById('search-input').value;
+		document.getElementById('page' + CurPage).style.display = 'block';
+		document.getElementById('nav' + CurPage).setAttribute('class', 'active');
+		var q = document.getElementById('search-input').value;
 		if (q.indexOf(' ext:') > -1) return;
 		if (q.indexOf(' type:all') > -1) document.getElementById('menu-type-all').setAttribute('class', 'checked');
 		if (q.indexOf(' type:text') > -1) document.getElementById('menu-type-text').setAttribute('class', 'checked');
 		if (q.indexOf(' type:pics') > -1) document.getElementById('menu-type-pics').setAttribute('class', 'checked');
 		if (q.indexOf(' type:video') > -1) document.getElementById('menu-type-video').setAttribute('class', 'checked');
-		if (q.indexOf(' type:music') > -1) document.getElementById('menu-type-music').setAttribute('class', 'checked');
+		if (q.indexOf(' type:audio') > -1) document.getElementById('menu-type-audio').setAttribute('class', 'checked');
 		if (q.indexOf(' type:arch') > -1) document.getElementById('menu-type-arch').setAttribute('class', 'checked');
 		if (q.indexOf(' type:') == -1) document.getElementById('menu-type-text').setAttribute('class', 'checked');
 	});
@@ -39,7 +52,7 @@
 <body>
 <div id="header">
 	<a href="/"><img src="/templates/logo2.png"></a>
-	<input onkeydown="if (event.keyCode==13) document.location.href='/?q='+document.getElementById('search-input').value;" id="search-input" autofocus autocomplete="off" name="q" tabindex="1" value="[%NAME%]" autocapitalize="off" autocorrect="off" type="text">
+	<input onkeydown="if (event.keyCode == 13) document.location.href='/?q='+document.getElementById('search-input').value;" id="search-input" autofocus autocomplete="off" name="q" tabindex="1" value="[%NAME%]" autocapitalize="off" autocorrect="off" type="text">
 
 	<div id="clear"></div>
 	<div id="menu">
@@ -48,7 +61,7 @@
 		<a id="menu-type-text" onclick="RequestWithType('text');" href="#">Текст</a>  
 		<a id="menu-type-pics" onclick="RequestWithType('pics');" href="#">Картинки</a>  
 		<a id="menu-type-video" onclick="RequestWithType('video');" href="#">Видео</a>  
-		<a id="menu-type-music" onclick="RequestWithType('music');" href="#">Музыка</a>  
+		<a id="menu-type-audio" onclick="RequestWithType('audio');" href="#">Аудио</a>  
 		<a id="menu-type-arch" onclick="RequestWithType('arch');" href="#">Архивы</a>
 	</div>
 </div>
@@ -62,11 +75,15 @@
 <!--<p>По Вашему запросу <b>123</b> не найдено соответствующих файлов.</p>-->
 
 <!--
-<div id="item">
-<span id="title" onclick="Request('/?OpenFile=C:\\123.html', this);">123.html</span>
-<div id="link" style="color:green;">C:\123.html</div>
-<span id="open-folder" onclick="Request('/?OpenFolder=C:\\123.html', this);">Открыть папку</span>
+<div id="page1">
+	<div id="item">
+		<span id="title" onclick="Request('/?OpenFile=C:\\123.html', this);">123.html</span>
+		<div id="link" style="color:green;">C:\123.html</div>
+		<span id="open-folder" onclick="Request('/?OpenFolder=C:\\123.html', this);">Открыть папку</span>
+	</div>
 </div>
+
+<div id="pages">Страницы: <span id="nav1" onclick="ShowResults(1);">1</span></div>
 -->
 
 </div>

@@ -3,7 +3,7 @@ object Main: TMain
   Top = 124
   BorderIcons = [biSystemMenu, biMinimize]
   BorderStyle = bsSingle
-  Caption = #1057#1086#1079#1076#1072#1085#1080#1077' '#1073#1072#1079#1099' '#1076#1072#1085#1085#1099#1093' '#1076#1083#1103' '#1087#1086#1080#1089#1082#1072' Home Search'
+  Caption = #1057#1086#1079#1076#1072#1085#1080#1077' '#1073#1072#1079#1099' '#1076#1072#1085#1085#1099#1093' '#1076#1083#1103' '#1087#1086#1080#1089#1082#1072
   ClientHeight = 444
   ClientWidth = 467
   Color = clBtnFace
@@ -111,7 +111,7 @@ object Main: TMain
     TabOrder = 6
   end
   object TextCB: TCheckBox
-    Left = 72
+    Left = 64
     Top = 224
     Width = 49
     Height = 17
@@ -119,7 +119,7 @@ object Main: TMain
     TabOrder = 7
   end
   object PicsCB: TCheckBox
-    Left = 144
+    Left = 128
     Top = 224
     Width = 73
     Height = 17
@@ -127,7 +127,7 @@ object Main: TMain
     TabOrder = 8
   end
   object ArchCB: TCheckBox
-    Left = 232
+    Left = 336
     Top = 224
     Width = 65
     Height = 17
@@ -232,7 +232,23 @@ object Main: TMain
     TabOrder = 13
     OnClick = SaveIgnorePathsBtnClick
   end
-  object XPManifest1: TXPManifest
+  object VideoCB: TCheckBox
+    Left = 208
+    Top = 224
+    Width = 57
+    Height = 17
+    Caption = #1042#1080#1076#1077#1086
+    TabOrder = 17
+  end
+  object AudioCB: TCheckBox
+    Left = 272
+    Top = 224
+    Width = 57
+    Height = 17
+    Caption = #1040#1091#1076#1080#1086
+    TabOrder = 18
+  end
+  object XPManifest: TXPManifest
     Left = 368
     Top = 392
   end
