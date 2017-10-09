@@ -193,6 +193,7 @@ begin
   Tray(1);
   Main.AlphaBlend:=true;
   Main.AlphaBlendValue:=0;
+  //SetWindowLong(Application.Handle, GWL_EXSTYLE,GetWindowLong(Application.Handle, GWL_EXSTYLE) or WS_EX_TOOLWINDOW);  //Скрываем программу с панели задач
 end;
 
 //Возможное количество ошибок для слова
@@ -282,7 +283,7 @@ function FixNameURI(str: string): string;
 begin
   str:=StringReplace(str, '\', '\\', [rfReplaceAll]);
   str:=StringReplace(str, '&', '*AMP', [rfReplaceAll]);
-  str:=StringReplace(str, '''', '*APOS', [rfReplaceAll]);
+  str:=StringReplace(str, '''', '*APOS', [rfReplaceAll]);  //апостроф заменяется на спец. фразу *APOS
   Result:=str;
 end;
 
@@ -295,7 +296,7 @@ end;
 function RevertFixNameURI(str: string): string;
 begin
   str:=URLDecode(str);
-  str:=StringReplace(str, '*APOS', '''', [rfReplaceAll]);
+  str:=StringReplace(str, '*APOS', '''', [rfReplaceAll]);  //апостроф заменяется на спец. фразу *APOS
   str:=StringReplace(str, '\\', '\',[rfReplaceAll]);
   str:=StringReplace(str, '*AMP', '&',[rfReplaceAll]);
   if UTF8Decode(str) <> '' then str:=UTF8ToAnsi(str);
@@ -478,7 +479,7 @@ begin
 
     //Вывод результатов
     PagesCount:=1;
-    Results.Add(#9 + '<div id="page1" style="display:none;">' + #13#10);
+    Results.Add(#9 + '<div id="page1" style="display:block;">' + #13#10);
     for i:=0 to Length(ResultsA) - 1 do begin
       if (i + 1) mod ResultsPageCount = 0 then begin
         Inc(PagesCount);
@@ -497,7 +498,8 @@ begin
   //Вывод страничной навигации
   if PagesCount > 1 then begin
     Results.Add(#13#10 + '<div id="pages">Страницы: ');
-    for i:=1 to PagesCount do
+    Results.Text:=Results.Text + '<span id="nav1" class="active" onclick="ShowResults(1);">1</span>';
+    for i:=2 to PagesCount do
        Results.Text:=Results.Text + '<span id="nav' + IntToStr(i) + '" onclick="ShowResults(' + IntToStr(i) + ');">' + IntToStr(i) + '</span>';
     Results.Add(#13#10 + '</div>');
   end;
