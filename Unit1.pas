@@ -10,10 +10,10 @@ uses
 
 type
   TMain = class(TForm)
-    Label1: TLabel;
-    Label2: TLabel;
-    Label3: TLabel;
-    Label4: TLabel;
+    PathSearchLbl: TLabel;
+    ExtFilesLbl: TLabel;
+    TypeFilesLbl: TLabel;
+    IgnorePathLbl: TLabel;
     CreateCategoryBtn: TButton;
     ExtEdit: TEdit;
     AllCB: TCheckBox;
@@ -101,8 +101,8 @@ var
 function min3(a, b, c: integer): integer;
 begin
   Result := a;
-  if b < Result then Result := b;
-  if c < Result then Result := c;
+  if b < Result then Result:= b;
+  if c < Result then Result:= c;
 end;
 
 procedure Tray(n:integer); //1 - добавить, 2 - удалить, 3 -  заменить
@@ -129,7 +129,11 @@ end;
 procedure TMain.IconMouse(var Msg: TMessage);
 begin
   case Msg.lParam of
-    WM_LButtonUp: GoToSearchBtn.Click;
+    WM_LButtonDown: begin
+      PostMessage(Handle, WM_LBUTTONDOWN, MK_LBUTTON, 0);
+      PostMessage(Handle, WM_LBUTTONUP, MK_LBUTTON, 0);
+    end;
+    WM_LBUTTONDBLCLK: GoToSearchBtn.Click;
     WM_RButtonUp: PopupMenu.Popup(Mouse.CursorPos.X, Mouse.CursorPos.Y);
   end;
 end;
@@ -283,7 +287,7 @@ function FixNameURI(str: string): string;
 begin
   str:=StringReplace(str, '\', '\\', [rfReplaceAll]);
   str:=StringReplace(str, '&', '*AMP', [rfReplaceAll]);
-  str:=StringReplace(str, '''', '*APOS', [rfReplaceAll]);  //апостроф заменяется на спец. фразу *APOS
+  str:=StringReplace(str, '''', '*APOS', [rfReplaceAll]);  //апостроф заменяется на спец. слово *APOS
   Result:=str;
 end;
 
@@ -296,7 +300,7 @@ end;
 function RevertFixNameURI(str: string): string;
 begin
   str:=URLDecode(str);
-  str:=StringReplace(str, '*APOS', '''', [rfReplaceAll]);  //апостроф заменяется на спец. фразу *APOS
+  str:=StringReplace(str, '*APOS', '''', [rfReplaceAll]);  //апостроф заменяется на спец. слово *APOS
   str:=StringReplace(str, '\\', '\',[rfReplaceAll]);
   str:=StringReplace(str, '*AMP', '&',[rfReplaceAll]);
   if UTF8Decode(str) <> '' then str:=UTF8ToAnsi(str);
@@ -624,7 +628,7 @@ procedure TMain.IdHTTPServerCommandGet(AThread: TIdPeerThread;
 var
   RequestText, RequestType, RequestExt, RequestCategory, TempRequestDocument, TempFilePath, TempDirPath: string; i: integer;
 begin
-  if (AllowIPs.Count > 0) and (Trim(AnsiUpperCase(AllowIPs.Strings[0]))<>'ALL') then
+  if (AllowIPs.Count > 0) and (Trim(AnsiUpperCase(AllowIPs.Strings[0])) <> 'ALL') then
     if Pos(AThread.Connection.Socket.Binding.PeerIP, AllowIPs.Text)=0 then Exit;
 
   CoInitialize(nil);
@@ -646,7 +650,7 @@ begin
   if ARequestInfo.Params.Count > 0 then begin
 
     //Открытие файлов по запросу
-    if Copy(ARequestInfo.Params.Text, 1, 9)='OpenFile=' then begin
+    if Copy(ARequestInfo.Params.Text, 1, 9) = 'OpenFile=' then begin
       AResponseInfo.ContentText:=TemplateOpen.Text;
       TempFilePath:=RevertFixNameURI(Copy(ARequestInfo.Params.Strings[0], 10, Length(ARequestInfo.Params.Strings[0])));
       if FileExists(TempFilePath) then begin
@@ -656,7 +660,7 @@ begin
     end;
 
     //Открытие папок по запросу
-    if Copy(ARequestInfo.Params.Text, 1, 11)='OpenFolder=' then begin
+    if Copy(ARequestInfo.Params.Text, 1, 11) = 'OpenFolder=' then begin
       TempFilePath:=RevertFixNameURI(Copy(ARequestInfo.Params.Strings[0], 12, Length(ARequestInfo.Params.Strings[0])));
       if FileExists(TempFilePath) then begin
         ShellExecute(0, 'open', 'explorer', PChar('/select, '+ TempFilePath), nil, SW_SHOW);
@@ -669,7 +673,7 @@ begin
     end;
 
 
-    if Copy(ARequestInfo.Params.Text, 1, 2)='q=' then begin
+    if Copy(ARequestInfo.Params.Text, 1, 2) = 'q=' then begin
     
       RequestText:=Copy(ARequestInfo.Params.Strings[0], 3, Length(ARequestInfo.Params.Strings[0]));
 
@@ -696,11 +700,11 @@ begin
 
       //Удаление из запроса команд
       if Pos(' type:', AnsiLowerCase(RequestText)) > 0 then
-        RequestText:=Copy(RequestText, 1, Pos(' type:', AnsiLowerCase(RequestText))-1);
+        RequestText:=Copy(RequestText, 1, Pos(' type:', AnsiLowerCase(RequestText)) - 1);
       if Pos(' ext:', AnsiLowerCase(RequestText)) > 0 then
-        RequestText:=Copy(RequestText, 1, Pos(' ext:', AnsiLowerCase(RequestText))-1);
+        RequestText:=Copy(RequestText, 1, Pos(' ext:', AnsiLowerCase(RequestText)) - 1);
       if Pos(' cat:', AnsiLowerCase(RequestText)) > 0 then
-        RequestText:=Copy(RequestText, 1, Pos(' cat:', AnsiLowerCase(RequestText))-1);
+        RequestText:=Copy(RequestText, 1, Pos(' cat:', AnsiLowerCase(RequestText)) - 1);
 
         AResponseInfo.ContentText:=StringReplace( StringReplace(TemplateResults.Text, '[%NAME%]', Copy(ARequestInfo.Params.Strings[0], 3, Length(ARequestInfo.Params.Strings[0])), [rfReplaceAll]),
       '[%RESULTS%]', GetResults(RequestText, RequestType, RequestExt, RequestCategory), [rfIgnoreCase]);
@@ -739,7 +743,8 @@ end;
 procedure TMain.AddPathBtnClick(Sender: TObject);
 begin
   Paths.Lines.Add(BrowseFolderDialog('Выберите папку'));
-  if Paths.Lines.Strings[Paths.Lines.Count-1] = '' then Paths.Lines.Delete(Paths.Lines.Count - 1);
+  if Paths.Lines.Strings[Paths.Lines.Count-1] = '' then
+    Paths.Lines.Delete(Paths.Lines.Count - 1);
 end;
 
 procedure TMain.ClearFormatsBtnClick(Sender: TObject);
@@ -813,7 +818,7 @@ end;
 
 procedure TMain.AboutBtnClick(Sender: TObject);
 begin
-    Application.MessageBox('Home Search 0.4' + #13#10 + 'Последнее обновление: 09.10.2017' + #13#10 + 'http://r57zone.github.io' + #13#10 + 'r57zone@gmail.com', 'О программе...', 0);
+    Application.MessageBox('Home Search 0.4.1' + #13#10 + 'Последнее обновление: 25.12.2017' + #13#10 + 'http://r57zone.github.io' + #13#10 + 'r57zone@gmail.com', 'О программе...', 0);
 end;
 
 procedure TMain.PathsKeyDown(Sender: TObject; var Key: Word;

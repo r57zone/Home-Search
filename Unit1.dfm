@@ -56,28 +56,28 @@ object Main: TMain
   OnDestroy = FormDestroy
   PixelsPerInch = 96
   TextHeight = 13
-  object Label1: TLabel
+  object PathSearchLbl: TLabel
     Left = 8
     Top = 8
     Width = 239
     Height = 13
     Caption = #1055#1072#1087#1082#1080' '#1076#1083#1103' '#1087#1086#1080#1089#1082#1072' ('#1085#1072#1087#1088#1080#1084#1077#1088', "C:\Documents"):'
   end
-  object Label2: TLabel
+  object ExtFilesLbl: TLabel
     Left = 8
     Top = 144
     Width = 104
     Height = 13
     Caption = #1056#1072#1089#1096#1080#1088#1077#1085#1080#1103' '#1092#1072#1081#1083#1086#1074
   end
-  object Label3: TLabel
+  object TypeFilesLbl: TLabel
     Left = 8
     Top = 200
     Width = 60
     Height = 13
     Caption = #1058#1080#1087' '#1092#1072#1081#1083#1086#1074
   end
-  object Label4: TLabel
+  object IgnorePathLbl: TLabel
     Left = 8
     Top = 256
     Width = 261
@@ -90,7 +90,7 @@ object Main: TMain
     Width = 75
     Height = 25
     Caption = #1057#1086#1079#1076#1072#1090#1100
-    TabOrder = 14
+    TabOrder = 16
     OnClick = CreateCategoryBtnClick
   end
   object ExtEdit: TEdit
@@ -132,7 +132,7 @@ object Main: TMain
     Width = 65
     Height = 17
     Caption = #1040#1088#1093#1080#1074#1099
-    TabOrder = 9
+    TabOrder = 11
   end
   object ClearFormatsBtn: TButton
     Left = 384
@@ -149,7 +149,7 @@ object Main: TMain
     Width = 369
     Height = 105
     ScrollBars = ssBoth
-    TabOrder = 10
+    TabOrder = 12
     OnKeyDown = IgnorePathsKeyDown
   end
   object AddIgnorePathBtn: TButton
@@ -158,7 +158,7 @@ object Main: TMain
     Width = 75
     Height = 25
     Caption = #1044#1086#1073#1072#1074#1080#1090#1100
-    TabOrder = 11
+    TabOrder = 13
     OnClick = AddIgnorePathBtnClick
   end
   object Paths: TMemo
@@ -185,7 +185,7 @@ object Main: TMain
     Width = 75
     Height = 25
     Caption = #1054#1090#1084#1077#1085#1072
-    TabOrder = 15
+    TabOrder = 17
     OnClick = CancelBtnClick
   end
   object StatusBar: TStatusBar
@@ -220,7 +220,7 @@ object Main: TMain
     Width = 75
     Height = 25
     Caption = #1054#1090#1082#1088#1099#1090#1100
-    TabOrder = 12
+    TabOrder = 14
     OnClick = OpenIgnorePathsBtnClick
   end
   object SaveIgnorePathsBtn: TButton
@@ -229,7 +229,7 @@ object Main: TMain
     Width = 75
     Height = 25
     Caption = #1057#1086#1093#1088#1072#1085#1080#1090#1100
-    TabOrder = 13
+    TabOrder = 15
     OnClick = SaveIgnorePathsBtnClick
   end
   object VideoCB: TCheckBox
@@ -238,7 +238,7 @@ object Main: TMain
     Width = 57
     Height = 17
     Caption = #1042#1080#1076#1077#1086
-    TabOrder = 17
+    TabOrder = 9
   end
   object AudioCB: TCheckBox
     Left = 272
@@ -246,7 +246,7 @@ object Main: TMain
     Width = 57
     Height = 17
     Caption = #1040#1091#1076#1080#1086
-    TabOrder = 18
+    TabOrder = 10
   end
   object XPManifest: TXPManifest
     Left = 368
