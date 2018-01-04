@@ -101,8 +101,10 @@ var
 function min3(a, b, c: integer): integer;
 begin
   Result := a;
-  if b < Result then Result:= b;
-  if c < Result then Result:= c;
+  if b < Result then
+    Result:= b;
+  if c < Result then
+    Result:= c;
 end;
 
 procedure Tray(n:integer); //1 - добавить, 2 - удалить, 3 -  заменить
@@ -144,34 +146,38 @@ var i, j, m, n: integer;
     cost: integer;
     flip: boolean;
 begin 
-  s := copy(s, 1, cuthalf - 1);
-  t := copy(t, 1, cuthalf - 1); 
-  m := Length(s);
-  n := Length(t);
-  if m = 0 then Result := n
-  else if n = 0 then Result := m
+  s:=copy(s, 1, cuthalf - 1);
+  t:=copy(t, 1, cuthalf - 1);
+  m:=Length(s);
+  n:=Length(t);
+  if m = 0 then
+    Result:=n
+  else if n = 0 then
+    Result:=m
   else begin
     flip := false;
-    for i := 0 to n do buf[i] := i;
-    for i := 1 to m do begin
-      if flip then buf[0] := i
-      else buf[cuthalf] := i;
-      for j := 1 to n do begin
-        if s[i] = t[j] then cost := 0
-        else cost := 1;
+    for i:=0 to n do buf[i] := i;
+    for i:=1 to m do begin
+      if flip then buf[0]:=i
+      else buf[cuthalf]:=i;
+      for j:=1 to n do begin
+        if s[i] = t[j] then
+          cost:=0
+        else
+          cost:=1;
         if flip then
-          buf[j] := min3((buf[cuthalf + j] + 1),
+          buf[j]:=min3((buf[cuthalf + j] + 1),
                          (buf[j - 1] + 1),
                          (buf[cuthalf + j - 1] + cost))
         else
-          buf[cuthalf + j] := min3((buf[j] + 1),
-                                   (buf[cuthalf + j - 1] + 1),
-                                   (buf[j - 1] + cost));
+          buf[cuthalf + j]:=min3((buf[j] + 1), (buf[cuthalf + j - 1] + 1), (buf[j - 1] + cost));
       end;
-      flip := not flip;
+      flip:=not flip;
     end;
-    if flip then Result := buf[cuthalf + n]
-    else Result := buf[n];
+    if flip then
+      Result:=buf[cuthalf + n]
+    else
+      Result:=buf[n];
   end;
 end;
 
@@ -222,46 +228,46 @@ var
   function WebHexToInt(HexChar: Char): Integer;
     begin
       if HexChar < '0' then
-        Result := Ord(HexChar) + 256 - Ord('0')
+        Result:=Ord(HexChar) + 256 - Ord('0')
       else if HexChar <= Chr(Ord('A') - 1) then
-        Result := Ord(HexChar) - Ord('0')
+        Result:=Ord(HexChar) - Ord('0')
       else if HexChar <= Chr(Ord('a') - 1) then
-        Result := Ord(HexChar) - Ord('A') + 10
+        Result:=Ord(HexChar) - Ord('A') + 10
       else
-        Result := Ord(HexChar) - Ord('a') + 10;
+        Result:=Ord(HexChar) - Ord('a') + 10;
       end;
 begin
-  len := 0;
-  n_coded := 0;
-  for i := 1 to Length(S) do
+  len:=0;
+  n_coded:=0;
+  for i:=1 to Length(S) do
     if n_coded >= 1 then begin
-      n_coded := n_coded + 1;
+      n_coded:=n_coded + 1;
         if n_coded >= 3 then
-          n_coded := 0;
+          n_coded:=0;
     end else begin
-      len := len + 1;
+      len:=len + 1;
       if S[i] = '%' then
-        n_coded := 1;
+        n_coded:=1;
     end;
   SetLength(Result, len);
-  idx := 0;
-  n_coded := 0;
-  for i := 1 to Length(S) do
+  idx:=0;
+  n_coded:=0;
+  for i:=1 to Length(S) do
     if n_coded >= 1 then begin
-      n_coded := n_coded + 1;
+      n_coded:=n_coded + 1;
       if n_coded >= 3 then begin
-        Result[idx] := Chr((WebHexToInt(S[i - 1]) * 16 +
+        Result[idx]:=Chr((WebHexToInt(S[i - 1]) * 16 +
         WebHexToInt(S[i])) mod 256);
-        n_coded := 0;
+        n_coded:=0;
       end;
     end else begin
-      idx := idx + 1;
+      idx:=idx + 1;
       if S[i] = '%' then
-        n_coded := 1;
+        n_coded:=1;
       if S[i] = '+' then
-        Result[idx] := ' '
+        Result[idx]:=' '
       else
-        Result[idx] := S[i];
+        Result[idx]:=S[i];
     end;
 end;
 
@@ -297,14 +303,15 @@ begin
   Result:=(s <> '') and (UTF8Decode(s) <> '')
 end;
 
-function RevertFixNameURI(str: string): string;
+function RevertFixNameURI(Str: string): string;
 begin
-  str:=URLDecode(str);
-  str:=StringReplace(str, '*APOS', '''', [rfReplaceAll]);  //апостроф заменяется на спец. слово *APOS
-  str:=StringReplace(str, '\\', '\',[rfReplaceAll]);
-  str:=StringReplace(str, '*AMP', '&',[rfReplaceAll]);
-  if UTF8Decode(str) <> '' then str:=UTF8ToAnsi(str);
-  Result:=str;
+  Str:=URLDecode(str);
+  Str:=StringReplace(str, '*APOS', '''', [rfReplaceAll]);  //апостроф заменяется на спец. слово *APOS
+  Str:=StringReplace(str, '\\', '\',[rfReplaceAll]);
+  Str:=StringReplace(str, '*AMP', '&',[rfReplaceAll]);
+  if UTF8Decode(Str) <> '' then
+    Str:=UTF8ToAnsi(Str);
+  Result:=Str;
 end;
 
 function TMain.GetResults(RequestText, RequestType, RequestExt, RequestCategory: string): string;
@@ -333,7 +340,8 @@ begin
   if RequestCategory <> '' then begin
     if FileExists(ExtractFilePath(ParamStr(0)) + RequestCategory + '.xml') then
       RequestCategory:=RequestCategory + '.xml';
-  end else RequestCategory:='default.xml';
+  end else
+    RequestCategory:='default.xml';
 
   doc:=LoadXMLDocument(ExtractFilePath(ParamStr(0)) + RequestCategory);
 
@@ -394,7 +402,7 @@ begin
         if (Length(SearchList.Strings[n]) > MinCountWord) and (Length(CheckList.Strings[j]) > MinCountWord) then begin
 
           //Проверка на прямое вхождение
-          if AnsiLowerCase(SearchList.Strings[n])=AnsiLowerCase(CheckList.Strings[j]) then
+          if AnsiLowerCase(SearchList.Strings[n]) = AnsiLowerCase(CheckList.Strings[j]) then
             resultRank:=resultRank + 7;
 
           //Проверка на частичное вхождение
@@ -496,6 +504,9 @@ begin
       //'<div id="description">Пусто</div>' + #13#10 +
       #9#9#9 + '<span id="open-folder" onclick="Request(''' + '/?OpenFolder=' + FixNameURI(ResultsA[i].path) + ''', this);">Открыть папку</span>' + #13#10 +
       #9#9 + '</div>' + #13#10);
+
+      //Не выводить мусорные результаты, 10 страниц хватит всем!
+      if i = (ResultsPageCount * 20) - 2 then break;
     end;
       Results.Add(#9 + '</div>' + #13#10);
 
@@ -777,7 +788,8 @@ end;
 
 procedure TMain.DefaultHandler(var Message);
 begin
-  if TMessage(Message).Msg = WM_TASKBARCREATED then Tray(1);
+  if TMessage(Message).Msg = WM_TASKBARCREATED then
+    Tray(1);
   inherited;
 end;
 
@@ -818,7 +830,9 @@ end;
 
 procedure TMain.AboutBtnClick(Sender: TObject);
 begin
-    Application.MessageBox('Home Search 0.4.1' + #13#10 + 'Последнее обновление: 25.12.2017' + #13#10 + 'http://r57zone.github.io' + #13#10 + 'r57zone@gmail.com', 'О программе...', 0);
+    Application.MessageBox('Home Search 0.4.2' + #13#10 +
+    'Последнее обновление: 04.01.2018' + #13#10 +
+    'http://r57zone.github.io' + #13#10 + 'r57zone@gmail.com', 'О программе...', MB_ICONINFORMATION);
 end;
 
 procedure TMain.PathsKeyDown(Sender: TObject; var Key: Word;
