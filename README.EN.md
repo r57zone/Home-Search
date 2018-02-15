@@ -11,7 +11,7 @@ By default, the access to the search is open only for the address 127.0.0.1. You
 ## Filters
 For a better search, you can apply filters.
 <br>
-The "ext" filter is used to search for files with a specific extension.<br>Examples of queries with this filter: "Payment for electric power ext:doc+xls" or "Cot ext:jpg".<br><br>
+The "ext" filter is used to search for files with a specific extension.<br>Examples of queries with this filter: "Payment for electric power ext:doc+xls" or "Cat ext:jpg".<br><br>
 Filter "type" - to search for files by type of data.<br>Examples of queries with this filter: "123 type:all", "Photo type:pics", "Space type:video", "NCS type:music", "ubuntu type:arch".<br><br>
 Filter "cat" - to search for files in a separate category.<br>Example of query is "Setting up gnome cat:linux," where "linux" is the name of the database to search for ("Linux.xml").<br>
 By default, the search is done in the standard category ("default.xml").<br>
