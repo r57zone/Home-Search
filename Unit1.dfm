@@ -84,23 +84,22 @@ object Main: TMain
     Height = 13
     Caption = #1048#1075#1085#1086#1088#1080#1088#1086#1074#1072#1090#1100' '#1087#1072#1087#1082#1080' ('#1085#1072#1087#1088#1080#1084#1077#1088', "C:\Program Files"):'
   end
-  object CreateCategoryBtn: TButton
+  object CreateCatBtn: TButton
     Left = 8
     Top = 392
     Width = 75
     Height = 25
     Caption = #1057#1086#1079#1076#1072#1090#1100
     TabOrder = 16
-    OnClick = CreateCategoryBtnClick
+    OnClick = CreateCatBtnClick
   end
-  object ExtEdit: TEdit
+  object ExtsEdit: TEdit
     Left = 8
     Top = 168
     Width = 369
     Height = 21
     TabOrder = 4
-    Text = 'txt htm html'
-    OnKeyDown = ExtEditKeyDown
+    OnKeyDown = ExtsEditKeyDown
   end
   object AllCB: TCheckBox
     Left = 8
@@ -134,14 +133,14 @@ object Main: TMain
     Caption = #1040#1088#1093#1080#1074#1099
     TabOrder = 11
   end
-  object ClearFormatsBtn: TButton
+  object ClearExtsBtn: TButton
     Left = 384
     Top = 168
     Width = 75
     Height = 21
     Caption = #1054#1095#1080#1089#1090#1080#1090#1100
     TabOrder = 5
-    OnClick = ClearFormatsBtnClick
+    OnClick = ClearExtsBtnClick
   end
   object IgnorePaths: TMemo
     Left = 8
