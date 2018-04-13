@@ -1,6 +1,8 @@
 object Main: TMain
   Left = 192
   Top = 124
+  AlphaBlend = True
+  AlphaBlendValue = 0
   BorderIcons = [biSystemMenu, biMinimize]
   BorderStyle = bsSingle
   Caption = #1057#1086#1079#1076#1072#1085#1080#1077' '#1073#1072#1079#1099' '#1076#1072#1085#1085#1099#1093' '#1076#1083#1103' '#1087#1086#1080#1089#1082#1072
@@ -275,17 +277,24 @@ object Main: TMain
       Caption = #1055#1086#1080#1089#1082
       OnClick = GoToSearchBtnClick
     end
-    object N2: TMenuItem
+    object Line: TMenuItem
       Caption = '-'
     end
     object DataBaseBtn: TMenuItem
-      Caption = #1041#1072#1079#1072' '#1076#1072#1085#1085#1099#1093
-      object DataBaseCreateBtn: TMenuItem
+      Caption = #1041#1072#1079#1099' '#1076#1072#1085#1085#1099#1093
+      object DBCreateBtn: TMenuItem
         Caption = #1057#1086#1079#1076#1072#1090#1100
-        OnClick = DataBaseCreateBtnClick
+        OnClick = DBCreateBtnClick
+      end
+      object Line3: TMenuItem
+        Caption = '-'
+      end
+      object DBsOpen: TMenuItem
+        Caption = #1054#1073#1079#1086#1088
+        OnClick = DBsOpenClick
       end
     end
-    object N6: TMenuItem
+    object Line2: TMenuItem
       Caption = '-'
     end
     object AboutBtn: TMenuItem
