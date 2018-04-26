@@ -675,10 +675,24 @@ var
 begin
   DBSaveName:='';
 
-  if InputQuery(Caption, 'Введите название базы данных', DBSaveName) then begin
+  if InputQuery(Caption, 'Введите название базы данных:', DBSaveName) then begin
 
     if Pos(' ', DBSaveName) > 0 then begin
       Application.MessageBox('Название базы данных не должно содержать пробелов.', PChar(Application.Title), MB_ICONWARNING);
+      Exit;
+    end;
+
+    //NTFS
+    if (Pos('\', DBSaveName) > 0) or (Pos('/', DBSaveName) > 0) or (Pos(':', DBSaveName) > 0) or (Pos('*', DBSaveName) > 0) or
+    (Pos('?', DBSaveName) > 0) or (Pos('"', DBSaveName) > 0) or (Pos('<', DBSaveName) > 0) or (Pos('>', DBSaveName) > 0) or
+    (Pos('|', DBSaveName) > 0) or
+
+    //FAT
+    (Pos('+', DBSaveName) > 0) or (Pos('.', DBSaveName) > 0) or (Pos(';', DBSaveName) > 0) or
+    (Pos('=', DBSaveName) > 0) or (Pos('[', DBSaveName) > 0) or (Pos(']', DBSaveName) > 0)
+
+    then begin
+      Application.MessageBox('Имя файла не должно содержать запрещенных файловой системой знаков.', PChar(Application.Title), MB_ICONWARNING);
       Exit;
     end;
 
@@ -722,15 +736,15 @@ begin
     FileTagsList:=TStringList.Create;
     XMLFile:=TStringList.Create;
     XMLFile.Add('<?xml version="1.0" encoding="windows-1251" ?>'+#13#10+'<tree>'+#13#10+' <files>');
-    for i:=0 to Paths.Lines.Count-1 do
+    for i:=0 to Paths.Lines.Count - 1 do
       if Trim(Paths.Lines.Strings[i]) <> '' then ScanDir(Paths.Lines.Strings[i]);
     XMLFile.Add(' </files>'+#13#10+'</tree>');
-    if FileExists(SaveDialog.FileName) then DeleteFile(SaveDialog.FileName);
-    XMLFile.SaveToFile(SaveDialog.FileName);
+    if FileExists(ExtractFilePath(ParamStr(0)) + 'dbs\' + DBSaveName + '.xml') then DeleteFile(ExtractFilePath(ParamStr(0)) + 'dbs\' + DBSaveName + '.xml');
+    XMLFile.SaveToFile(ExtractFilePath(ParamStr(0)) + 'dbs\' + DBSaveName + '.xml');
     XMLFile.Free;
     FileTagsList.Free;
-    Application.MessageBox('Готово', PChar(Application.Title), MB_ICONINFORMATION);
     StatusBar.SimpleText:='';
+    Application.MessageBox('Готово', PChar(Application.Title), MB_ICONINFORMATION);
 
     //Включение кнопок
     Paths.Enabled:=true;
