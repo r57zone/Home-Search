@@ -671,13 +671,16 @@ end;
 
 procedure TMain.CreateCatBtnClick(Sender: TObject);
 var
-  i: integer;
+  i: integer; DBSaveName: string;
 begin
-  SaveDialog.FileName:='';
-  SaveDialog.Filter:='Базы данных|*.xml';
-  SaveDialog.DefaultExt:=SaveDialog.Filter;
+  DBSaveName:='';
 
-  if SaveDialog.Execute then begin
+  if InputQuery(Caption, 'Введите название базы данных', DBSaveName) then begin
+
+    if Pos(' ', DBSaveName) > 0 then begin
+      Application.MessageBox('Название базы данных не должно содержать пробелов.', PChar(Application.Title), MB_ICONWARNING);
+      Exit;
+    end;
 
     //Отключение кнопок
     Paths.Enabled:=false;
