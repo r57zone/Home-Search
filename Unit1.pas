@@ -47,6 +47,9 @@ type
     AudioCB: TCheckBox;
     DBsOpen: TMenuItem;
     Line3: TMenuItem;
+    TagsCB: TCheckBox;
+    TagsBtn: TMenuItem;
+    TagsCreateBtn: TMenuItem;
     procedure FormCreate(Sender: TObject);
     procedure CreateCatBtnClick(Sender: TObject);
     procedure IdHTTPServerCommandGet(AThread: TIdPeerThread;
@@ -61,18 +64,13 @@ type
     procedure GoToSearchBtnClick(Sender: TObject);
     procedure FormActivate(Sender: TObject);
     procedure AboutBtnClick(Sender: TObject);
-    procedure PathsKeyDown(Sender: TObject; var Key: Word;
-      Shift: TShiftState);
-    procedure IgnorePathsKeyDown(Sender: TObject; var Key: Word;
-      Shift: TShiftState);
-    procedure ExtsEditKeyDown(Sender: TObject; var Key: Word;
-      Shift: TShiftState);
     procedure CancelBtnClick(Sender: TObject);
     procedure OpenPathsBtnClick(Sender: TObject);
     procedure SavePathsBtnClick(Sender: TObject);
     procedure OpenIgnorePathsBtnClick(Sender: TObject);
     procedure SaveIgnorePathsBtnClick(Sender: TObject);
     procedure DBsOpenClick(Sender: TObject);
+    procedure TagsCreateBtnClick(Sender: TObject);
   private
     procedure ScanDir(Dir: string);
     procedure DefaultHandler(var Message); override;
@@ -88,6 +86,8 @@ type
 
 const
   DataBasesPath = 'dbs';
+  PathsExt = 'hsp'; //Расширение для файла со списком папок - Home Search Paths (HSP)
+  TagsExt = 'hst'; //Расширение для файла с тегами - Home Search Tags (HST)
 
 var
   Main: TMain;
@@ -101,8 +101,11 @@ var
   TextExts, PicExts, VideoExts, AudioExts, ArchExts: string;
 
   MaxPageResults, MaxPages: integer;
+  FileTagsList: TStringList;
   
 implementation
+
+uses Unit2;
 
 {$R *.dfm}
 
@@ -159,8 +162,8 @@ var i, j, m, n: integer;
     cost: integer;
     flip: boolean;
 begin 
-  s:=copy(s, 1, cuthalf - 1);
-  t:=copy(t, 1, cuthalf - 1);
+  s:=Copy(s, 1, cuthalf - 1);
+  t:=Copy(t, 1, cuthalf - 1);
   m:=Length(s);
   n:=Length(t);
   if m = 0 then
@@ -200,7 +203,7 @@ var
 begin
   Ini:=TIniFile.Create(ExtractFilePath(ParamStr(0)) + 'Setup.ini');
   IdHTTPServer.DefaultPort:=Ini.ReadInteger('Main', 'Port', 757);
-  TemplateName:=Ini.ReadString('Main', 'TemplateName', 'default');
+  TemplateName:=Ini.ReadString('Main', 'Template', 'default');
 
   //Результаты
   MaxPageResults:=Ini.ReadInteger('Results', 'MaxPageResults', 12);
@@ -240,7 +243,7 @@ begin
 end;
 
 //Возможное количество ошибок для слова
-function GetErrorCount(Str: string): integer;
+function GetWordErrorCount(Str: string): integer;
 begin
   Result:=(Length(Str) div 4) + 1;
 end;
@@ -251,7 +254,7 @@ begin
       0..9: Result := Chr(Digit + Ord('0'));
       10..15: Result := Chr(Digit - 10 + Ord('A'));
     else
-      Result := '0';
+      Result:='0';
   end;
 end;
 
@@ -304,21 +307,25 @@ begin
     end;
 end;
 
-function RevertFixName(Str: string): string;
-begin
-  Str:=StringReplace(Str, '&amp;', '&', [rfReplaceAll]);
-  Str:=StringReplace(Str, '&lt;', '<', [rfReplaceAll]);
-  Str:=StringReplace(Str, '&gt;', '>', [rfReplaceAll]);
-  Str:=StringReplace(Str, '&quot;', '«»', [rfReplaceAll]);
-  Result:=Str;
-end;
-
 function FixName(Str: string): string;
 begin
   Str:=StringReplace(Str, '&', '&amp;', [rfReplaceAll]);
-  Str:=StringReplace(Str, '<', '&lt;', [rfReplaceAll]);
-  Str:=StringReplace(Str, '>', '&gt;', [rfReplaceAll]);
-  Str:=StringReplace(Str, '«»', '&quot;', [rfReplaceAll]);
+  //Str:=StringReplace(Str, '<', '&lt;', [rfReplaceAll]);
+  //Str:=StringReplace(Str, '>', '&gt;', [rfReplaceAll]);
+  //Str:=StringReplace(Str, '"', '&quot;', [rfReplaceAll]);
+  //Str:=StringReplace(Str, '«', '&laquo;', [rfReplaceAll]);
+  //Str:=StringReplace(Str, '»', '&raquo;', [rfReplaceAll]);
+  Result:=Str;
+end;
+
+function RevertFixName(Str: string): string;
+begin
+  Str:=StringReplace(Str, '&amp;', '&', [rfReplaceAll]);
+  //Str:=StringReplace(Str, '&lt;', '<', [rfReplaceAll]);
+  //Str:=StringReplace(Str, '&gt;', '>', [rfReplaceAll]);
+  //Str:=StringReplace(Str, '&quot;', '"', [rfReplaceAll]);
+  //Str:=StringReplace(Str, '&laquo;', '«', [rfReplaceAll]);
+  //Str:=StringReplace(Str, '&raquo;', '»', [rfReplaceAll]);
   Result:=Str;
 end;
 
@@ -351,7 +358,7 @@ function TMain.GetResults(RequestText, RequestType, RequestExt, RequestCategory:
 var
   ResponseNode: IXMLNode; i, j, n, ResultRank, TickTime, PagesCount: integer; Doc: IXMLDocument;
   Filters: string;
-  CheckList, SearchList, Results: TStringList;
+  SearchList, CheckList, TagsList, Results: TStringList;
   ResultsA: array of Packed Record
     Name: string;
     Path: string;
@@ -361,10 +368,11 @@ var
   TempRank: integer;
   TempName, TempPath: string;
 const
-  MinCountWord = 2;
+  MinCountChars = 2;
 begin
-  CheckList:=TStringList.Create;
   SearchList:=TStringList.Create;
+  CheckList:=TStringList.Create;
+  TagsList:=TStringList.Create;
   Results:=TStringList.Create;
 
   RequestText:=AnsiLowerCase(RequestText);
@@ -411,11 +419,15 @@ begin
     //Преобразование названия в список (разбор поискового текста на строки)
     CheckList.Text:=AnsiLowerCase(ResponseNode.ChildNodes[i].NodeValue);
     CheckList.Text:=StringReplace(CheckList.Text, '&amp;', ' ', [rfReplaceAll]);
-    CheckList.Text:=StringReplace(CheckList.Text, '&lt;', '', [rfReplaceAll]);
-    CheckList.Text:=StringReplace(CheckList.Text, '&gt;', '', [rfReplaceAll]);
-    CheckList.Text:=StringReplace(CheckList.Text, '&quot;', '', [rfReplaceAll]);
+    //CheckList.Text:=StringReplace(CheckList.Text, '&lt;', '', [rfReplaceAll]);
+    //CheckList.Text:=StringReplace(CheckList.Text, '&gt;', '', [rfReplaceAll]);
+    //CheckList.Text:=StringReplace(CheckList.Text, '&quot;', '', [rfReplaceAll]);
     CheckList.Text:=StringReplace(CheckList.Text, '-', '', [rfReplaceAll]);
     CheckList.Text:=StringReplace(CheckList.Text, ' ', #13#10, [rfReplaceAll]);
+
+    //Преобразование тегов в список
+    TagsList.Text:=ResponseNode.ChildNodes[i].Attributes['tags']; //Теги в базе уже LowerCase
+    TagsList.Text:=StringReplace(TagsList.Text, ',', #13#10, [rfReplaceAll]);
 
     //Проверка на полное совпадение включая расширение
     if RequestText = AnsiLowerCase(ResponseNode.ChildNodes[i].NodeValue + '.' + ResponseNode.ChildNodes[i].Attributes['ext']) then
@@ -428,43 +440,71 @@ begin
     //Проверка на частичное вхождение
     if Pos(RequestText, CheckList.Text) > 0 then
       ResultRank:=ResultRank + 3;
-    if Pos(CheckList.Text, AnsiLowerCase(RequestText)) > 0 then
+
+    if Pos(CheckList.Text, RequestText) > 0 then
       ResultRank:=ResultRank + 3;
 
     //Проверка на совпадение c ошибками
-    if LevDist(RequestText, AnsiLowerCase(ResponseNode.ChildNodes[i].NodeValue)) < GetErrorCount(RequestText) then
+    if LevDist(RequestText, AnsiLowerCase(ResponseNode.ChildNodes[i].NodeValue)) < GetWordErrorCount(RequestText) then
       ResultRank:=ResultRank + 7;
 
+    //Проверка на отдельных слова
     for j:=0 to CheckList.Count - 1 do
       for n:=0 to SearchList.Count - 1 do begin
-        if (Length(SearchList.Strings[n]) > MinCountWord) and (Length(CheckList.Strings[j]) > MinCountWord) then begin
+        if (Length(SearchList.Strings[n]) > MinCountChars) and (Length(CheckList.Strings[j]) > MinCountChars) then begin
 
           //Проверка на прямое вхождение
           if SearchList.Strings[n] = CheckList.Strings[j] then
-            ResultRank:=ResultRank + 7;
-
-          //Проверка на частичное вхождение
-          if Pos(SearchList.Strings[n], CheckList.Strings[j]) > 0 then
-            ResultRank:=ResultRank + 5;
+            ResultRank:=ResultRank + 7
 
           //Проверка на вхождение с ошибками (расстояние Левинштейна)
-          if LevDist(SearchList.Strings[n], CheckList.Strings[j]) < GetErrorCount(SearchList.Strings[n]) then
+          else if LevDist(SearchList.Strings[n], CheckList.Strings[j]) < GetWordErrorCount(SearchList.Strings[n]) then
+            ResultRank:=ResultRank + 5
+
+          //Проверка на частичное вхождение
+          else if Pos(SearchList.Strings[n], CheckList.Strings[j]) > 0 then
             ResultRank:=ResultRank + 3;
         end;
 
-        //Проверка на прямое совпадение расширения с запросом (Запрос + " " + формат)
+        //Проверка на прямое совпадение расширения с запросом (Запрос + " " + расширение)
         if SearchList.Strings[n] = ResponseNode.ChildNodes[i].Attributes['ext'] then //Расширения в базе уже LowerCase
           ResultRank:=ResultRank + 1;
       end;
 
-    //Проверка на вхождение склеенных слов запроса
+    //Проверки на теги
+    if TagsList.Text <> '' then
+      for j:=0 to TagsList.Count - 1 do begin
+        for n:=0 to SearchList.Count - 1 do
+          if (Length(SearchList.Strings[n]) > MinCountChars) and (Length(TagsList.Strings[j]) > MinCountChars) then begin
+
+            //Проверка на прямое вхождение
+            if SearchList.Strings[n] = TagsList.Strings[j] then
+              ResultRank:=ResultRank + 7
+
+            //Проверка на вхождение с ошибками (расстояние Левинштейна)
+            else if LevDist(SearchList.Strings[n], TagsList.Strings[j]) < GetWordErrorCount(SearchList.Strings[n]) then
+              ResultRank:=ResultRank + 4;
+          end;
+
+          //Проверка на прямое совпадение тега и запроса
+          if RequestText = TagsList.Strings[j] then
+            ResultRank:=ResultRank + 8
+
+          //Проверка на совпадение с ошибками
+          else if LevDist(RequestText, TagsList.Strings[j]) < GetWordErrorCount(RequestText) then
+            ResultRank:=ResultRank + 5;
+        end;
+
+    //Проверка на вхождение рядом стоящих склеенных слов запроса
     for j:=0 to SearchList.Count - 2 do
       for n:=0 to CheckList.Count - 1 do begin
+
         //Проверка на прямое вхождение склеенных слов запроса
         if Pos(SearchList.Strings[j] + SearchList.Strings[j + 1], CheckList.Strings[n]) > 0 then
-          ResultRank:=ResultRank + 3;
-         //Проверка на вхождение склеенных слов запроса с ошибками (расстояние Левинштейна)
-        if LevDist(SearchList.Strings[j] + SearchList.Strings[j + 1], CheckList.Strings[n]) < GetErrorCount(SearchList.Strings[j] + SearchList.Strings[j + 1]) then
+          ResultRank:=ResultRank + 3
+
+         //Проверка на вхождение рядом стоящих склеенных слов запроса с ошибками (расстояние Левинштейна)
+        else if LevDist(SearchList.Strings[j] + SearchList.Strings[j + 1], CheckList.Strings[n]) < GetWordErrorCount(SearchList.Strings[j] + SearchList.Strings[j + 1]) then
           ResultRank:=ResultRank + 2;
 
       end;
@@ -472,10 +512,8 @@ begin
     //Преобразование пути в список папок
     CheckList.Text:=Copy(Copy(ResponseNode.ChildNodes[i].Attributes['path'], Length(ExtractFileDrive(ResponseNode.ChildNodes[i].Attributes['path'])) + 1, Length(ResponseNode.ChildNodes[i].Attributes['path'])), 2, Length(ResponseNode.ChildNodes[i].Attributes['path']) - Length(ResponseNode.ChildNodes[i].NodeValue + '.' + ResponseNode.ChildNodes[i].Attributes['ext']) - 3);
 
-    //Проверка на прямое вхождение запроса в название папки
+    //Проверка на частичное вхождение запроса в название всего пути
     if Pos(RequestText, CheckList.Text) > 0 then
-      ResultRank:=ResultRank + 3;
-    if Pos(CheckList.Text, RequestText) > 0 then
       ResultRank:=ResultRank + 3;
 
     //Разделение папок на строки
@@ -485,20 +523,20 @@ begin
       for j:=0 to CheckList.Count - 1 do
         for n:=0 to SearchList.Count - 1 do
 
-          if (Length(SearchList.Strings[n]) > MinCountWord) and (Length(CheckList.Strings[j]) > MinCountWord) then begin
+          if (Length(SearchList.Strings[n]) > MinCountChars) and (Length(CheckList.Strings[j]) > MinCountChars) then begin
 
             //Проверка на название папок без ошибок
             if SearchList.Strings[n] = CheckList.Strings[j] then
-              ResultRank:=ResultRank + 2 else
+              ResultRank:=ResultRank + 2
 
             //Проверка на название папок с ошибками (расстояние Левинштейна)
-            if (LevDist(SearchList.Strings[n], CheckList.Strings[j]) < GetErrorCount(SearchList.Strings[n])) then
+            else if (LevDist(SearchList.Strings[n], CheckList.Strings[j]) < GetWordErrorCount(SearchList.Strings[n])) then
               ResultRank:=ResultRank + 1;
 
           end; //Конец проверки на совпадения папок
 
 
-    //Если что-то совпало
+    //Если найдены совпадения
     if ResultRank > 0 then begin
 
       //Заполнение массива для сортировки по ResultRank
@@ -508,11 +546,11 @@ begin
       ResultsA[ResultsC - 1].Path:=ResponseNode.ChildNodes[i].Attributes['path'];
       ResultsA[ResultsC - 1].Rank:=ResultRank;
 
-    end; //Конец проверки на ResultRank
+    end;
 
   end; //Конец проверки XML
 
-  //Сортировка результатов по ResultRank
+  //Сортировка результатов по ResultRank, когда-нибудь заменить на quick sort
   for i:=0 to Length(ResultsA) - 1 do
     for j:=0 to Length(ResultsA) - 1 do
       if ResultsA[i].Rank > ResultsA[j].Rank then begin
@@ -569,13 +607,22 @@ begin
   Results.Free;
   SearchList.Free;
   CheckList.Free;
+  TagsList.Free;
+end;
+
+function CutStr(Str: string; CharCount: integer): string;
+begin
+  if Length(Str) > CharCount then
+    Result:=Copy(Str, 1, CharCount - 3) + '...'
+  else
+    Result:=Str;
 end;
 
 procedure TMain.ScanDir(Dir: string);
 var
-  SR: TSearchRec; i: integer;
+  SR: TSearchRec; i: integer; FileTags: string;
 begin
-  StatusBar.SimpleText:=' Идет сканирование папки ' + Dir;
+  StatusBar.SimpleText:=CutStr(' Идет сканирование папки: ' + Dir, 70);
 
   if Dir[Length(Dir)] <> '\' then Dir:=Dir + '\';
 
@@ -585,15 +632,38 @@ begin
       if Trim(IgnorePaths.Lines.Strings[i]) <> '' then
         if IgnorePaths.Lines.Strings[i] + '\' = Dir then Exit;
 
+  //Теги
+  if (TagsCB.Checked) and (FileExists(Dir + 'tags.' + TagsExt)) then
+    try
+      FileTagsList.LoadFromFile(Dir + 'tags.' + TagsExt);
+    except
+      FileTagsList.Text:='';
+    end;
+
   //Поиск файлов
   if FindFirst(Dir + '*.*', faAnyFile, SR) = 0 then begin
     repeat
       Application.ProcessMessages;
-      if (SR.name <> '.') and (SR.name <> '..') then
+      if (SR.Name <> '.') and (SR.Name <> '..') then
         if (SR.Attr and faDirectory) <> faDirectory then begin
-          if (Pos(AnsiLowerCase(Copy(ExtractFileExt(Dir + SR.name), 2, Length(ExtractFileExt(Dir + SR.name)))), AnsiLowerCase(ExtsEdit.Text)) > 0) or (ExtsEdit.Text = '') then
-            XMLFile.Add('   <file ext="' + AnsiLowerCase(Copy(ExtractFileExt(SR.Name), 2, Length(ExtractFileExt(SR.Name)))) + '" path="'+ FixName(Dir + SR.name) + '">'+ FixName(Copy(SR.Name, 1, Length(SR.Name) - Length(ExtractFileExt(SR.Name)))) + '</file>');
-        end else ScanDir(Dir + SR.name + '\');
+
+          if (Pos(AnsiLowerCase(Copy(ExtractFileExt(SR.Name), 2, Length(ExtractFileExt(SR.Name)))), AnsiLowerCase(ExtsEdit.Text)) > 0) or (ExtsEdit.Text = '') and (ExtractFileExt(SR.Name) <> '.' + TagsExt) then begin
+
+            FileTags:='';
+            //Теги
+            if (TagsCB.Checked) and (FileTagsList.Text <> '') then
+              for i:=0 to FileTagsList.Count - 1 do
+                if (Trim(FileTagsList.Strings[i]) <> '') and (AnsiLowerCase( Copy(FileTagsList.Strings[i], 1, Pos(#9, FileTagsList.Strings[i]) - 1)) = AnsiLowerCase(SR.Name)) then begin
+                  FileTags:=Copy(FileTagsList.Strings[i], Pos(#9, FileTagsList.Strings[i]) + 1, Length(FileTagsList.Strings[i]));
+                  FileTags:=StringReplace(FileTags, '  ', ' ', [rfReplaceAll]);
+                  FileTags:=StringReplace(FileTags, ', ', ',', [rfReplaceAll]);
+                  break;
+                end;
+
+            XMLFile.Add('   <file ext="' + AnsiLowerCase(Copy(ExtractFileExt(SR.Name), 2, Length(ExtractFileExt(SR.Name)))) + '" tags="' + AnsiLowerCase(FileTags) + '" path="'+ FixName(Dir + SR.name) + '">'+ FixName(Copy(SR.Name, 1, Length(SR.Name) - Length(ExtractFileExt(SR.Name)))) + '</file>');
+          end;
+            
+        end else ScanDir(Dir + SR.Name + '\');
     until FindNext(SR)<>0;
     FindClose(SR);
   end;
@@ -603,6 +673,7 @@ procedure TMain.CreateCatBtnClick(Sender: TObject);
 var
   i: integer;
 begin
+  SaveDialog.FileName:='';
   SaveDialog.Filter:='Базы данных|*.xml';
   SaveDialog.DefaultExt:=SaveDialog.Filter;
 
@@ -640,11 +711,12 @@ begin
       if Pos(AudioExts, ExtsEdit.Text) = 0 then ExtsEdit.Text:=ExtsEdit.Text + ' ' + AudioExts;
     if ArchCB.Checked then
       if Pos(ArchExts, ExtsEdit.Text) = 0 then ExtsEdit.Text:=ExtsEdit.Text + ' ' + ArchExts;
-    if ExtsEdit.Text[1] = ' ' then ExtsEdit.Text:=Copy(ExtsEdit.Text, 2, Length(ExtsEdit.Text));
+    if (ExtsEdit.Text <> '') and (ExtsEdit.Text[1] = ' ') then ExtsEdit.Text:=Copy(ExtsEdit.Text, 2, Length(ExtsEdit.Text));
 
 
     if AllCB.Checked then ExtsEdit.Text:='';
 
+    FileTagsList:=TStringList.Create;
     XMLFile:=TStringList.Create;
     XMLFile.Add('<?xml version="1.0" encoding="windows-1251" ?>'+#13#10+'<tree>'+#13#10+' <files>');
     for i:=0 to Paths.Lines.Count-1 do
@@ -653,7 +725,8 @@ begin
     if FileExists(SaveDialog.FileName) then DeleteFile(SaveDialog.FileName);
     XMLFile.SaveToFile(SaveDialog.FileName);
     XMLFile.Free;
-    Application.MessageBox('Готово', 'Home search', MB_ICONINFORMATION);
+    FileTagsList.Free;
+    Application.MessageBox('Готово', PChar(Application.Title), MB_ICONINFORMATION);
     StatusBar.SimpleText:='';
 
     //Включение кнопок
@@ -686,7 +759,7 @@ var
   RequestText, RequestType, RequestExt, RequestCategory, TempRequestDocument, TempFilePath, TempDirPath: string; i: integer;
 begin
   if (AllowIPs.Count > 0) and (Trim(AnsiUpperCase(AllowIPs.Strings[0])) <> 'ALL') then
-    if Pos(AThread.Connection.Socket.Binding.PeerIP, AllowIPs.Text)=0 then Exit;
+    if Pos(AThread.Connection.Socket.Binding.PeerIP, AllowIPs.Text) = 0 then Exit;
 
   CoInitialize(nil);
 
@@ -695,7 +768,7 @@ begin
   else begin
     TempRequestDocument:=StringReplace(ARequestInfo.Document, '/', '\', [rfReplaceAll]);
     TempRequestDocument:=StringReplace(TempRequestDocument, '\\', '\', [rfReplaceAll]);
-    if TempRequestDocument[1]='\' then Delete(TempRequestDocument, 1, 1);
+    if TempRequestDocument[1] = '\' then Delete(TempRequestDocument, 1, 1);
 
     if FileExists(ExtractFilePath(ParamStr(0)) + TempRequestDocument) then begin
       AResponseInfo.ContentType:=IdHTTPServer.MIMETable.GetDefaultFileExt(ExtractFilePath(ParamStr(0)) + TempRequestDocument);
@@ -734,7 +807,7 @@ begin
 
       RequestText:=Copy(ARequestInfo.Params.Strings[0], 3, Length(ARequestInfo.Params.Strings[0]));
 
-      RequestText:=StringReplace(RequestText, '  ', ' ', [rfIgnoreCase]);
+      RequestText:=StringReplace(RequestText, '  ', ' ', [rfReplaceAll]);
       RequestText:=StringReplace(RequestText, ' type: ', ' type:', [rfIgnoreCase]);
       RequestText:=StringReplace(RequestText, ' ext: ', ' ext:', [rfIgnoreCase]);
       RequestText:=StringReplace(RequestText, ' cat: ', ' cat:', [rfIgnoreCase]);
@@ -768,7 +841,7 @@ begin
       if Pos(' cat:', AnsiLowerCase(RequestText)) > 0 then
         RequestText:=Copy(RequestText, 1, Pos(' cat:', AnsiLowerCase(RequestText)) - 1);
 
-        AResponseInfo.ContentText:=StringReplace( StringReplace(TemplateResults.Text, '[%NAME%]', Copy(ARequestInfo.Params.Strings[0], 3, Length(ARequestInfo.Params.Strings[0])), [rfReplaceAll]),
+      AResponseInfo.ContentText:=StringReplace( StringReplace(TemplateResults.Text, '[%NAME%]', Copy(ARequestInfo.Params.Strings[0], 3, Length(ARequestInfo.Params.Strings[0])), [rfReplaceAll]),
       '[%RESULTS%]', GetResults(RequestText, RequestType, RequestExt, RequestCategory), [rfIgnoreCase]);
     end;
 
@@ -848,8 +921,6 @@ procedure TMain.DBCreateBtnClick(Sender: TObject);
 begin
   ShowWindow(Handle, SW_NORMAL);
   SetForegroundWindow(Main.Handle);
-
-  Main.Repaint;
 end;
 
 procedure TMain.GoToSearchBtnClick(Sender: TObject);
@@ -881,38 +952,21 @@ end;
 
 procedure TMain.AboutBtnClick(Sender: TObject);
 begin
-    Application.MessageBox('Home Search 0.5.2' + #13#10 +
-    'Последнее обновление: 13.04.2018' + #13#10 +
+    Application.MessageBox('Home Search 0.6' + #13#10 +
+    'Последнее обновление: 26.04.2018' + #13#10 +
     'http://r57zone.github.io' + #13#10 +
     'r57zone@gmail.com', 'О программе...', MB_ICONINFORMATION);
 end;
 
-procedure TMain.PathsKeyDown(Sender: TObject; var Key: Word;
-  Shift: TShiftState);
-begin
-  Main.Repaint;
-end;
-
-procedure TMain.IgnorePathsKeyDown(Sender: TObject; var Key: Word;
-  Shift: TShiftState);
-begin
-  Main.Repaint;
-end;
-
-procedure TMain.ExtsEditKeyDown(Sender: TObject; var Key: Word;
-  Shift: TShiftState);
-begin
-  Main.Repaint;
-end;
-
 procedure TMain.CancelBtnClick(Sender: TObject);
 begin
-  Close;
+  ShowWindow(Handle, SW_HIDE);
 end;
 
 procedure TMain.OpenPathsBtnClick(Sender: TObject);
 begin
   OpenDialog.FileName:='';
+  OpenDialog.Filter:='Папки Home Search|*.' + PathsExt;
   if OpenDialog.Execute then
     Paths.Lines.LoadFromFile(OpenDialog.FileName);
 end;
@@ -920,7 +974,7 @@ end;
 procedure TMain.SavePathsBtnClick(Sender: TObject);
 begin
   SaveDialog.FileName:='';
-  SaveDialog.Filter:='Файл HomeSearch|*.hsxt';
+  SaveDialog.Filter:='Папки Home Search|*.' + PathsExt;
   SaveDialog.DefaultExt:=SaveDialog.Filter;
   if SaveDialog.Execute then
     Paths.Lines.SaveToFile(SaveDialog.FileName);
@@ -929,6 +983,7 @@ end;
 procedure TMain.OpenIgnorePathsBtnClick(Sender: TObject);
 begin
   OpenDialog.FileName:='';
+  OpenDialog.Filter:='Папки Home Search|*.' + PathsExt;
   if OpenDialog.Execute then
     IgnorePaths.Lines.LoadFromFile(OpenDialog.FileName);
 end;
@@ -936,7 +991,7 @@ end;
 procedure TMain.SaveIgnorePathsBtnClick(Sender: TObject);
 begin
   SaveDialog.FileName:='';
-  SaveDialog.Filter:='Файл HomeSearch|*.hsxt';
+  SaveDialog.Filter:='Папки Home Search|*.' + PathsExt;
   SaveDialog.DefaultExt:=SaveDialog.Filter;
   if SaveDialog.Execute then
     IgnorePaths.Lines.SaveToFile(SaveDialog.FileName);
@@ -945,6 +1000,11 @@ end;
 procedure TMain.DBsOpenClick(Sender: TObject);
 begin
   ShellExecute(Handle, 'open', PChar(ExtractFilePath(ParamStr(0)) + DataBasesPath), nil, nil, SW_SHOW);
+end;
+
+procedure TMain.TagsCreateBtnClick(Sender: TObject);
+begin
+  TagsForm.Show;
 end;
 
 end.

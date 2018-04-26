@@ -55,10 +55,12 @@ body{font-family: arial,sans-serif; font-size:14px;}
 
 #results{margin-left:84px; padding:15px 0 25px 0; min-height:400px;}
 #item{width:860px; padding-bottom:15px; color:#1a0db3;}
-#item #open-folder{font-size:12px; text-decoration:underline;}
+#item #folder{font-size:12px; text-decoration:underline;}
 #item #title{font-size: 16px;}
-#item #title, #item #open-folder{cursor:pointer;}
-#item #title:hover, #item #open-folder:hover{text-decoration:underline;}
+#item #title, #item #folder{cursor:pointer;}
+#item #title:hover, #item #folder:hover{text-decoration:underline;}
+#item #link{color:green;}
+#item #description{color:black;}
 #pages {width:860px;}
 #pages span{cursor:pointer; padding: 3px 2px; display:inline-block; color: #4e8bec;}
 #pages .active{color:black;}

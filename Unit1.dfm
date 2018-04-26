@@ -5,8 +5,8 @@ object Main: TMain
   AlphaBlendValue = 0
   BorderIcons = [biSystemMenu, biMinimize]
   BorderStyle = bsSingle
-  Caption = #1057#1086#1079#1076#1072#1085#1080#1077' '#1073#1072#1079#1099' '#1076#1072#1085#1085#1099#1093' '#1076#1083#1103' '#1087#1086#1080#1089#1082#1072
-  ClientHeight = 444
+  Caption = #1057#1086#1079#1076#1072#1085#1080#1077' '#1073#1072#1079#1099' '#1076#1072#1085#1085#1099#1093
+  ClientHeight = 480
   ClientWidth = 467
   Color = clBtnFace
   Font.Charset = DEFAULT_CHARSET
@@ -88,11 +88,11 @@ object Main: TMain
   end
   object CreateCatBtn: TButton
     Left = 8
-    Top = 392
+    Top = 428
     Width = 75
     Height = 25
     Caption = #1057#1086#1079#1076#1072#1090#1100
-    TabOrder = 16
+    TabOrder = 17
     OnClick = CreateCatBtnClick
   end
   object ExtsEdit: TEdit
@@ -101,7 +101,6 @@ object Main: TMain
     Width = 369
     Height = 21
     TabOrder = 4
-    OnKeyDown = ExtsEditKeyDown
   end
   object AllCB: TCheckBox
     Left = 8
@@ -151,7 +150,6 @@ object Main: TMain
     Height = 105
     ScrollBars = ssBoth
     TabOrder = 12
-    OnKeyDown = IgnorePathsKeyDown
   end
   object AddIgnorePathBtn: TButton
     Left = 384
@@ -169,7 +167,6 @@ object Main: TMain
     Height = 105
     ScrollBars = ssBoth
     TabOrder = 0
-    OnKeyDown = PathsKeyDown
   end
   object AddPathBtn: TButton
     Left = 384
@@ -182,16 +179,16 @@ object Main: TMain
   end
   object CancelBtn: TButton
     Left = 88
-    Top = 392
+    Top = 428
     Width = 75
     Height = 25
     Caption = #1054#1090#1084#1077#1085#1072
-    TabOrder = 17
+    TabOrder = 18
     OnClick = CancelBtnClick
   end
   object StatusBar: TStatusBar
     Left = 0
-    Top = 425
+    Top = 461
     Width = 467
     Height = 19
     Panels = <>
@@ -249,9 +246,19 @@ object Main: TMain
     Caption = #1040#1091#1076#1080#1086
     TabOrder = 10
   end
+  object TagsCB: TCheckBox
+    Left = 8
+    Top = 400
+    Width = 201
+    Height = 17
+    Caption = #1042#1082#1083#1102#1095#1080#1090#1100' '#1090#1077#1075#1080' '#1080#1079' '#1092#1072#1081#1083#1086#1074' (tags.hst)'
+    Checked = True
+    State = cbChecked
+    TabOrder = 16
+  end
   object XPManifest: TXPManifest
     Left = 368
-    Top = 392
+    Top = 432
   end
   object IdHTTPServer: TIdHTTPServer
     Bindings = <>
@@ -264,15 +271,15 @@ object Main: TMain
     ReplyUnknownCommand.NumericCode = 0
     OnCommandGet = IdHTTPServerCommandGet
     Left = 400
-    Top = 392
+    Top = 432
   end
   object SaveDialog: TSaveDialog
     Left = 336
-    Top = 392
+    Top = 432
   end
   object PopupMenu: TPopupMenu
     Left = 432
-    Top = 392
+    Top = 432
     object GoToSearchBtn: TMenuItem
       Caption = #1055#1086#1080#1089#1082
       OnClick = GoToSearchBtnClick
@@ -294,6 +301,13 @@ object Main: TMain
         OnClick = DBsOpenClick
       end
     end
+    object TagsBtn: TMenuItem
+      Caption = #1058#1077#1075#1080
+      object TagsCreateBtn: TMenuItem
+        Caption = #1057#1086#1079#1076#1072#1090#1100
+        OnClick = TagsCreateBtnClick
+      end
+    end
     object Line2: TMenuItem
       Caption = '-'
     end
@@ -307,8 +321,7 @@ object Main: TMain
     end
   end
   object OpenDialog: TOpenDialog
-    Filter = #1060#1072#1081#1083' HomeSearch|*.hsxt'
     Left = 304
-    Top = 392
+    Top = 432
   end
 end

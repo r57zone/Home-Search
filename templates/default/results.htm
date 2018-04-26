@@ -4,10 +4,13 @@
 <meta http-equiv="Content-Type" content="text/html; charset=windows-1251" />
 <meta name="description" content="Home Search"/>
 <title>[%NAME%] - Home Search</title>
-<link rel="stylesheet" href="/templates/style.css">
+<link rel="shortcut icon" href="/templates/default/favicon.ico">
+<link rel="stylesheet" href="/templates/default/style.css">
 <script type="text/javascript">
 	function RequestWithType(q, e){
 		var myValue = document.getElementById('search-input').value;
+		myValue = myValue.replace('  ', ' ');
+		myValue = myValue.replace(' type: ', ' type:');
 		myValue = myValue.replace(' type:all', '');
 		myValue = myValue.replace(' type:text', '');
 		myValue = myValue.replace(' type:pics', '');
@@ -26,6 +29,8 @@
 	document.addEventListener("DOMContentLoaded", function(event) {
 		var q = document.getElementById('search-input').value;
 		if (q.indexOf(' ext:') > -1) return;
+		q = q.replace('  ', ' ');
+		q = q.replace(' type: ', ' type:');
 		if (q.indexOf(' type:all') > -1) document.getElementById('menu-type-all').setAttribute('class', 'checked');
 		if (q.indexOf(' type:text') > -1) document.getElementById('menu-type-text').setAttribute('class', 'checked');
 		if (q.indexOf(' type:pics') > -1) document.getElementById('menu-type-pics').setAttribute('class', 'checked');
@@ -49,12 +54,12 @@
 </head>
 <body>
 <div id="header">
-	<a href="/"><img src="/templates/logo2.png"></a>
+	<a href="/"><img src="/templates/default/logo-small.png"></a>
 	<input onkeydown="if (event.keyCode == 13) document.location.href='/?q='+document.getElementById('search-input').value;" id="search-input" autofocus autocomplete="off" name="q" tabindex="1" value="[%NAME%]" autocapitalize="off" autocorrect="off" type="text">
 
 	<div id="clear"></div>
 	<div id="menu">
-		<!--<a id="checked" href="#">Текст</a>-->
+		<!--<a class="checked" href="#">Текст</a>-->
 		<a id="menu-type-all" onclick="RequestWithType('all');" href="#">Все</a>  
 		<a id="menu-type-text" onclick="RequestWithType('text');" href="#">Текст</a>  
 		<a id="menu-type-pics" onclick="RequestWithType('pics');" href="#">Картинки</a>  
@@ -75,9 +80,9 @@
 <!--
 <div id="page1">
 	<div id="item">
-		<span id="title" onclick="Request('/?OpenFile=C:\\123.html', this);">123.html</span>
-		<div id="link" style="color:green;">C:\123.html</div>
-		<span id="open-folder" onclick="Request('/?OpenFolder=C:\\123.html', this);">Открыть папку</span>
+		<span id="title" onclick="Request('/?file=C:\\123.html', this);">123.html</span>
+		<div id="link">C:\123.html</div>
+		<span id="folder" onclick="Request('/?folder=C:\\123.html', this);">Открыть папку</span>
 	</div>
 </div>
 
