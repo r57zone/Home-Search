@@ -20,7 +20,7 @@
 
 ## Скриншоты
 ![](https://user-images.githubusercontent.com/9499881/39301171-455c934c-495f-11e8-9937-cabff7001416.png)
-![](https://user-images.githubusercontent.com/9499881/39301172-457d64be-495f-11e8-94b9-025b9be51e3e.png)
+![](https://user-images.githubusercontent.com/9499881/39425928-b6e2df3a-4c8e-11e8-8d83-0e4527395310.png)
 
 ## Загрузка
 >Версия для Windows XP, 7, 8.1, 10.<br>
