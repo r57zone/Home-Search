@@ -550,7 +550,7 @@ begin
 
   end; //Конец проверки XML
 
-  //Сортировка результатов по ResultRank, когда-нибудь заменить на quick sort
+  //Сортировка результатов по ResultRank
   for i:=0 to Length(ResultsA) - 1 do
     for j:=0 to Length(ResultsA) - 1 do
       if ResultsA[i].Rank > ResultsA[j].Rank then begin
@@ -603,6 +603,7 @@ begin
     Results.Add('</div>');
   end;
 
+  ResultsA:=nil;
   Result:=Results.Text;
   Results.Free;
   SearchList.Free;
@@ -685,11 +686,11 @@ begin
     //NTFS
     if (Pos('\', DBSaveName) > 0) or (Pos('/', DBSaveName) > 0) or (Pos(':', DBSaveName) > 0) or (Pos('*', DBSaveName) > 0) or
     (Pos('?', DBSaveName) > 0) or (Pos('"', DBSaveName) > 0) or (Pos('<', DBSaveName) > 0) or (Pos('>', DBSaveName) > 0) or
-    (Pos('|', DBSaveName) > 0) or
+    (Pos('|', DBSaveName) > 0)// or
 
     //FAT
-    (Pos('+', DBSaveName) > 0) or (Pos('.', DBSaveName) > 0) or (Pos(';', DBSaveName) > 0) or
-    (Pos('=', DBSaveName) > 0) or (Pos('[', DBSaveName) > 0) or (Pos(']', DBSaveName) > 0)
+    //(Pos('+', DBSaveName) > 0) or (Pos('.', DBSaveName) > 0) or (Pos(';', DBSaveName) > 0) or
+    //(Pos('=', DBSaveName) > 0) or (Pos('[', DBSaveName) > 0) or (Pos(']', DBSaveName) > 0)
 
     then begin
       Application.MessageBox('Имя файла не должно содержать запрещенных файловой системой знаков.', PChar(Application.Title), MB_ICONWARNING);
@@ -739,8 +740,8 @@ begin
     for i:=0 to Paths.Lines.Count - 1 do
       if Trim(Paths.Lines.Strings[i]) <> '' then ScanDir(Paths.Lines.Strings[i]);
     XMLFile.Add(' </files>'+#13#10+'</tree>');
-    if FileExists(ExtractFilePath(ParamStr(0)) + 'dbs\' + DBSaveName + '.xml') then DeleteFile(ExtractFilePath(ParamStr(0)) + 'dbs\' + DBSaveName + '.xml');
-    XMLFile.SaveToFile(ExtractFilePath(ParamStr(0)) + 'dbs\' + DBSaveName + '.xml');
+    if FileExists(ExtractFilePath(ParamStr(0)) + DataBasesPath + '\' + DBSaveName + '.xml') then DeleteFile(ExtractFilePath(ParamStr(0)) + 'dbs\' + DBSaveName + '.xml');
+    XMLFile.SaveToFile(ExtractFilePath(ParamStr(0)) + DataBasesPath + '\' + DBSaveName + '.xml');
     XMLFile.Free;
     FileTagsList.Free;
     StatusBar.SimpleText:='';
@@ -810,10 +811,10 @@ begin
     if Copy(ARequestInfo.Params.Text, 1, 7) = 'folder=' then begin
       TempFilePath:=RevertFixNameURI(Copy(ARequestInfo.Params.Strings[0], 8, Length(ARequestInfo.Params.Strings[0])));
       if FileExists(TempFilePath) then begin
-        ShellExecute(0, 'open', 'explorer', PChar('/select, '+ TempFilePath), nil, SW_SHOW);
+        ShellExecute(0, 'open', 'explorer', PChar('/select, ' + TempFilePath), nil, SW_SHOW);
         AResponseInfo.ContentText:=TemplateOpen.Text;
       end else begin
-        TempDirPath:=Copy(TempFilePath, 1, Pos(ExtractFileName(TempFilePath), TempFilePath)-1);
+        TempDirPath:=Copy(TempFilePath, 1, Pos(ExtractFileName(TempFilePath), TempFilePath) - 1);
         if DirectoryExists(TempDirPath) then ShellExecute(0, 'open', PChar(TempDirPath), nil, nil, SW_SHOW)
         else AResponseInfo.ContentText:=StringReplace(Template404.Text, '[%FILE%]', UTF8ToAnsi(TempDirPath), [rfIgnoreCase]);
       end;
@@ -969,8 +970,8 @@ end;
 
 procedure TMain.AboutBtnClick(Sender: TObject);
 begin
-    Application.MessageBox('Home Search 0.6' + #13#10 +
-    'Последнее обновление: 26.04.2018' + #13#10 +
+    Application.MessageBox('Home Search 0.6.1' + #13#10 +
+    'Последнее обновление: 12.05.2018' + #13#10 +
     'http://r57zone.github.io' + #13#10 +
     'r57zone@gmail.com', 'О программе...', MB_ICONINFORMATION);
 end;
