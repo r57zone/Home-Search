@@ -62,7 +62,6 @@ type
     procedure FormDestroy(Sender: TObject);
     procedure DBCreateBtnClick(Sender: TObject);
     procedure GoToSearchBtnClick(Sender: TObject);
-    procedure FormActivate(Sender: TObject);
     procedure AboutBtnClick(Sender: TObject);
     procedure CancelBtnClick(Sender: TObject);
     procedure OpenPathsBtnClick(Sender: TObject);
@@ -71,6 +70,7 @@ type
     procedure SaveIgnorePathsBtnClick(Sender: TObject);
     procedure DBsOpenClick(Sender: TObject);
     procedure TagsCreateBtnClick(Sender: TObject);
+    procedure FormActivate(Sender: TObject);
   private
     procedure ScanDir(Dir: string);
     procedure DefaultHandler(var Message); override;
@@ -130,16 +130,16 @@ begin
     cbSize:=SizeOf(nim);
     wnd:=Main.Handle;
     uId:=1;
-    uFlags:=nif_icon or nif_message or nif_tip;
+    uFlags:=NIF_ICON or NIF_MESSAGE or NIF_TIP;
     //hIcon:=Application.Icon.Handle;
     hIcon:=Main.Icon.Handle;
     uCallBackMessage:=WM_User + 1;
     StrCopy(szTip, PChar(Application.Title));
   end;
   case n of
-    1: Shell_NotifyIcon(nim_add, @nim);
-    2: Shell_NotifyIcon(nim_delete, @nim);
-    3: Shell_NotifyIcon(nim_modify, @nim);
+    1: Shell_NotifyIcon(NIM_ADD, @nim);
+    2: Shell_NotifyIcon(NIM_DELETE, @nim);
+    3: Shell_NotifyIcon(NIM_MODIFY, @nim);
   end;
 end;
 
@@ -152,7 +152,7 @@ begin
       PostMessage(Handle, WM_LBUTTONUP, MK_LBUTTON, 0);
     end;
     WM_LBUTTONDBLCLK: GoToSearchBtn.Click;
-    WM_RBUTTONUP: PopupMenu.Popup(Mouse.CursorPos.X, Mouse.CursorPos.Y);
+    WM_RBUTTONDOWN: PopupMenu.Popup(Mouse.CursorPos.X, Mouse.CursorPos.Y);
   end;
 end;
 
@@ -201,8 +201,10 @@ procedure TMain.FormCreate(Sender: TObject);
 var
   Ini: TIniFile;
 begin
+  //Main.BorderStyle:=bsNone;
   Ini:=TIniFile.Create(ExtractFilePath(ParamStr(0)) + 'Setup.ini');
   IdHTTPServer.DefaultPort:=Ini.ReadInteger('Main', 'Port', 757);
+  IdHTTPServer.TerminateWaitTime:=Ini.ReadInteger('Main', 'TerminateWaitTime', 5000);
   TemplateName:=Ini.ReadString('Main', 'Template', 'default');
 
   //Результаты
@@ -237,7 +239,7 @@ begin
   Tray(1);
   //Main.AlphaBlend:=true;
   //Main.AlphaBlendValue:=0;
-  //SetWindowLong(Application.Handle, GWL_EXSTYLE,GetWindowLong(Application.Handle, GWL_EXSTYLE) or WS_EX_TOOLWINDOW);  //Скрываем программу с панели задач
+  SetWindowLong(Application.Handle, GWL_EXSTYLE,GetWindowLong(Application.Handle, GWL_EXSTYLE) or WS_EX_TOOLWINDOW);  //Скрываем программу с панели задач
 
   ExtsEdit.Text:=TextExts;
 end;
@@ -775,6 +777,7 @@ procedure TMain.IdHTTPServerCommandGet(AThread: TIdPeerThread;
   ARequestInfo: TIdHTTPRequestInfo; AResponseInfo: TIdHTTPResponseInfo);
 var
   RequestText, RequestType, RequestExt, RequestCategory, TempRequestDocument, TempFilePath, TempDirPath: string; i: integer;
+  WND: HWND;
 begin
   if (AllowIPs.Count > 0) and (Trim(AnsiUpperCase(AllowIPs.Strings[0])) <> 'ALL') then
     if Pos(AThread.Connection.Socket.Binding.PeerIP, AllowIPs.Text) = 0 then Exit;
@@ -799,11 +802,13 @@ begin
 
     //Открытие файлов по запросу
     if Copy(ARequestInfo.Params.Text, 1, 5) = 'file=' then begin
+      WND:=GetForegroundWindow();
       AResponseInfo.ContentText:=TemplateOpen.Text;
       TempFilePath:=RevertFixNameURI(Copy(ARequestInfo.Params.Strings[0], 6, Length(ARequestInfo.Params.Strings[0])));
       if FileExists(TempFilePath) then begin
         ShellExecute(0, 'open', PChar(TempFilePath), nil, nil, SW_SHOW);
         AResponseInfo.ContentText:=TemplateOpen.Text;
+        SetForegroundWindow(WND);
       end else AResponseInfo.ContentText:=StringReplace(Template404.Text, '[%FILE%]', AnsiToUTF8(TempFilePath), [rfIgnoreCase]);
     end;
 
@@ -958,20 +963,10 @@ begin
   end;
 end;
 
-procedure TMain.FormActivate(Sender: TObject);
-begin
-  if RunOnce = false then begin
-    RunOnce:=true;
-    Main.AlphaBlend:=false;
-    ShowWindow(Handle, SW_HIDE);  //Скрываем программу
-    ShowWindow(Application.Handle, SW_HIDE);  //Скрываем программу с панели задач
-  end;
-end;
-
 procedure TMain.AboutBtnClick(Sender: TObject);
 begin
-    Application.MessageBox('Home Search 0.6.1' + #13#10 +
-    'Последнее обновление: 12.05.2018' + #13#10 +
+    Application.MessageBox('Home Search 0.6.3' + #13#10 +
+    'Последнее обновление: 17.11.2018' + #13#10 +
     'http://r57zone.github.io' + #13#10 +
     'r57zone@gmail.com', 'О программе...', MB_ICONINFORMATION);
 end;
@@ -1023,6 +1018,16 @@ end;
 procedure TMain.TagsCreateBtnClick(Sender: TObject);
 begin
   TagsForm.Show;
+end;
+
+procedure TMain.FormActivate(Sender: TObject);
+begin
+  if RunOnce = false then begin
+    RunOnce:=true;
+    Main.AlphaBlendValue:=255;
+    ShowWindow(Handle, SW_HIDE);  //Скрываем программу
+    ShowWindow(Application.Handle, SW_HIDE);  //Скрываем программу с панели задач
+  end;
 end;
 
 end.
