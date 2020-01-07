@@ -23,8 +23,9 @@ By default the search is done in the standard category ("default.xml").<br>
 ![](https://user-images.githubusercontent.com/9499881/71764401-ec594400-2f00-11ea-8cd5-d1af186c99de.png)
 
 ## Download
->Version for Windows XP, 7, 8.1, 10.<br>
-**[Download](https://github.com/r57zone/Home-Search/releases)**<br>
+>Version for Windows XP, 7, 8.1, 10.
+
+**[Download](https://github.com/r57zone/Home-Search/releases)**
 ## Feedback
 `r57zone[at]gmail.com`
 

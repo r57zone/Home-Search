@@ -23,8 +23,9 @@
 ![](https://user-images.githubusercontent.com/9499881/39425928-b6e2df3a-4c8e-11e8-8d83-0e4527395310.png)
 
 ## Загрузка
->Версия для Windows XP, 7, 8.1, 10.<br>
-**[Загрузить](https://github.com/r57zone/Home-Search/releases)**<br>
+>Версия для Windows XP, 7, 8.1, 10.
+
+**[Загрузить](https://github.com/r57zone/Home-Search/releases)**
 
 ## Обратная связь
 `r57zone[собака]gmail.com`
