@@ -2,12 +2,12 @@
 <html>
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=windows-1251" />
-<meta name="description" content="Home Search"/>
+<meta name="description" content="Поиск - Home Search"/>
 <title>[%NAME%] - Home Search</title>
 <link rel="shortcut icon" href="/templates/default/favicon.ico">
 <link rel="stylesheet" href="/templates/default/style.css">
 <script type="text/javascript">
-	function RequestWithType(q, e){
+	function RequestWithType(q){
 		var myValue = document.getElementById('search-input').value;
 		myValue = myValue.replace('  ', ' ');
 		myValue = myValue.replace(' type: ', ' type:');
@@ -18,7 +18,6 @@
 		myValue = myValue.replace(' type:audio', '');
 		myValue = myValue.replace(' type:arch', '');
 		document.location.href = '/?q=' + myValue + ' type:' + q;
-		e.style.color = '#660099';
 	}
 	
 	function Request(q, e){
@@ -53,44 +52,46 @@
 </script>
 </head>
 <body>
-<div id="header">
-	<a href="/"><img src="/templates/default/logo-small.png"></a>
-	<input onkeydown="if (event.keyCode == 13) document.location.href='/?q='+document.getElementById('search-input').value;" id="search-input" autofocus autocomplete="off" name="q" tabindex="1" value="[%NAME%]" autocapitalize="off" autocorrect="off" type="text">
+	<div id="wrapper">
+		<div id="header">
+			<a href="/"><img src="/templates/default/logo-small.png"></a>
+			<input onkeydown="if (event.keyCode == 13) document.location.href='/?q='+document.getElementById('search-input').value;" id="search-input" autofocus autocomplete="off" name="q" tabindex="1" value="[%NAME%]" autocapitalize="off" autocorrect="off" type="text">
 
-	<div id="clear"></div>
-	<div id="menu">
-		<!--<a class="checked" href="#">Текст</a>-->
-		<a id="menu-type-all" onclick="RequestWithType('all');" href="#">Все</a>  
-		<a id="menu-type-text" onclick="RequestWithType('text');" href="#">Текст</a>  
-		<a id="menu-type-pics" onclick="RequestWithType('pics');" href="#">Картинки</a>  
-		<a id="menu-type-video" onclick="RequestWithType('video');" href="#">Видео</a>  
-		<a id="menu-type-audio" onclick="RequestWithType('audio');" href="#">Аудио</a>  
-		<a id="menu-type-arch" onclick="RequestWithType('arch');" href="#">Архивы</a>
+			<div id="clear"></div>
+			<div id="menu">
+				<!--<a class="checked" href="#">Текст</a>-->
+				<a id="menu-type-all" onclick="RequestWithType('all');" href="#">Все</a>  
+				<a id="menu-type-text" onclick="RequestWithType('text');" href="#">Текст</a>  
+				<a id="menu-type-pics" onclick="RequestWithType('pics');" href="#">Картинки</a>  
+				<a id="menu-type-video" onclick="RequestWithType('video');" href="#">Видео</a>  
+				<a id="menu-type-audio" onclick="RequestWithType('audio');" href="#">Аудио</a>  
+				<a id="menu-type-arch" onclick="RequestWithType('arch');" href="#">Архивы</a>
+			</div>
+		</div>
+
+
+	<div id="results">
+
+		[%RESULTS%]
+
+		<!--<span style="display:block; color:gray; padding-bottom:12px;">Результатов: 19 (0,718 сек.)</span>-->
+		<!--<p>По Вашему запросу <b>123</b> не найдено соответствующих файлов.</p>-->
+
+		<!--
+		<div id="page1">
+			<div id="item">
+				<span id="title" onclick="Request('/?file=C:\\123.html', this);">123.html</span>
+				<div id="link">C:\123.html</div>
+				<span id="folder" onclick="Request('/?folder=C:\\123.html', this);">Открыть папку</span>
+			</div>
+		</div>
+
+		<div id="pages">Страницы: <span id="nav1" onclick="ShowResults(1);">1</span></div>
+		-->
+
 	</div>
-</div>
 
-
-<div id="results">
-
-[%RESULTS%]
-
-<!--<span style="display:block; color:gray; padding-bottom:12px;">Результатов: 19 (0,718 сек.)</span>-->
-<!--<p>По Вашему запросу <b>123</b> не найдено соответствующих файлов.</p>-->
-
-<!--
-<div id="page1">
-	<div id="item">
-		<span id="title" onclick="Request('/?file=C:\\123.html', this);">123.html</span>
-		<div id="link">C:\123.html</div>
-		<span id="folder" onclick="Request('/?folder=C:\\123.html', this);">Открыть папку</span>
+		<div id="footer">Home Search © 2020</div>
 	</div>
-</div>
-
-<div id="pages">Страницы: <span id="nav1" onclick="ShowResults(1);">1</span></div>
--->
-
-</div>
-
-<div id="footer">Home Search © 2017</div>
 </body>
 </html>

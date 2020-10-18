@@ -1,16 +1,23 @@
-html,body{margin:0;padding:0;}
-body{font-family: arial,sans-serif; font-size:14px;}
+html,body{margin:0; padding:0; height:100%;}
+body{font-family:arial,sans-serif; font-size:14px;}
 :focus{outline:0;}
 #clear{clear:both;float:none;}
+
+#wrapper{
+	display:flex;
+	flex-direction:column;
+	justify-content:space-between;
+	min-height:100%;
+}
 
 /* Template Index */
 
 #start{
 	color:#9a9a9a;
-	margin-top:10%;
 	border:0px solid black;
 	text-align:center;
-	}
+	height:450px;
+}
 
 #start input[type="text"]{
 	border:1px solid #d0d0d0;
@@ -20,7 +27,7 @@ body{font-family: arial,sans-serif; font-size:14px;}
 	font-size:16px;
 	padding: 10px 15px;
 	border-radius: 3px;
-	}
+}
 
 /* Template Results text */
 
@@ -53,7 +60,7 @@ body{font-family: arial,sans-serif; font-size:14px;}
 #menu .checked{color:#4285f4; border-bottom:2px solid #4285f4;}
 #menu .checked:hover{color:#659fff;}
 
-#results{margin-left:84px; padding:15px 0 25px 0; min-height:400px;}
+#results{margin-left:84px; flex: 1 0 auto; padding:15px 0 25px 0; min-height:400px;}
 #item{width:860px; padding-bottom:15px; color:#1a0db3;}
 #item #folder{font-size:12px; text-decoration:underline;}
 #item #title{font-size: 16px;}
@@ -66,10 +73,9 @@ body{font-family: arial,sans-serif; font-size:14px;}
 #pages .active{color:black;}
 
 #footer{
-	margin-bottom:0;
+	flex: 0 0 auto;
 	color:#666666;
 	padding:20px;
-	height:18px;
 	background-color:#f7f7f7;
 	border-top:1px solid #e5e5e5;
 	text-align:center;
